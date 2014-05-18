@@ -1,0 +1,2 @@
+pyuic4 -o ui_vector_selectbypoint.py ui_vector_selectbypoint.ui
+pyrcc4 -o resources.py  resources.qrc
