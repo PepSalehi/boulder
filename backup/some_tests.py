@@ -17,3 +17,5 @@ for feature in layer.getFeatures():
     elif lts ==4 :
         assert islLTS_1 == islLTS_2 == islLTS_3 == 0
         assert islLTS_4 > 0
+else:
+	print "Yoohoo, no errors!"
