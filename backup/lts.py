@@ -772,8 +772,8 @@ class street_link_object(object):
         else:
             self.bike_lane =0
 
-        if self.cross_LTS != NULL:
-            update_LTS(int(self.cross_LTS))
+        # if self.cross_LTS != NULL: # what is this?
+        #     update_LTS(int(self.cross_LTS))
 
         if self.override != None:
             self.LTS = self.override
