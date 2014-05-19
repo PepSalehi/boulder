@@ -613,6 +613,28 @@ class LTS:
             # substitute with your code)
             pass
 
+
+    def lets_Test(self):
+        for feature in layer.getFeatures():
+            numberOfLane = feature['NUMLANE']
+            lts = feature ['_lts12']
+            islLTS_1 = feature['_isl_lts1']
+            islLTS_2 = feature['_isl_lts2'] 
+            islLTS_3 = feature['_isl_lts3'] 
+            islLTS_4 = feature['_isl_lts4'] 
+            if lts ==1 : assert islLTS_1 > 0
+            elif lts ==2 :
+                assert islLTS_1 == 0
+                assert islLTS_2 > 0
+            elif lts ==3 :
+                assert islLTS_1 == islLTS_2 == 0
+                assert islLTS_3 > 0
+            elif lts ==4 :
+                assert islLTS_1 == islLTS_2 == islLTS_3 == 0
+                assert islLTS_4 > 0
+
+
+
 #############################################################################################################
 class street_link_object(object):
     ''' object representing a link, with the goal of calculating its LTS'''
@@ -734,7 +756,7 @@ class street_link_object(object):
         # orig_num_lane= self.num_lane
         ##############
         skip = False
-        if not self.one_way:  #it's 2 way
+        if (not self.one_way) or (self.one_way == "None"):  #it's 2 way 
             self.num_lane = floor(self.num_lane/2)
         #####
         # for now, cl_guess is always none
@@ -750,8 +772,8 @@ class street_link_object(object):
         else:
             self.bike_lane =0
 
-        if self.cross_LTS != NULL:
-            update_LTS(int(self.cross_LTS))
+        # if self.cross_LTS != NULL: # what is this?
+        #     update_LTS(int(self.cross_LTS))
 
         if self.override != None:
             self.LTS = self.override

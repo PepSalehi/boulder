@@ -756,7 +756,7 @@ class street_link_object(object):
         # orig_num_lane= self.num_lane
         ##############
         skip = False
-        if not self.one_way:  #it's 2 way
+        if (not self.one_way) or (self.one_way == "None"):  #it's 2 way 
             self.num_lane = floor(self.num_lane/2)
         #####
         # for now, cl_guess is always none
@@ -772,8 +772,8 @@ class street_link_object(object):
         else:
             self.bike_lane =0
 
-        if self.cross_LTS != NULL:
-            update_LTS(int(self.cross_LTS))
+        # if self.cross_LTS != NULL: # what is this?
+        #     update_LTS(int(self.cross_LTS))
 
         if self.override != None:
             self.LTS = self.override
