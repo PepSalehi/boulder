@@ -36,6 +36,9 @@ from math import floor,ceil
 import networkx as nx 
 from collections import OrderedDict
 import os 
+import processing
+import random
+import time 
 ############## read or write shapefiles
 """
 *********
@@ -298,13 +301,13 @@ class LTS:
         # Create action that will start plugin configuration
         self.action = QAction(
             QIcon(":/plugins/lts/icon.png"),
-            u"LTS calculator", self.iface.mainWindow())
+            u"LTS Toolbox", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
 
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu(u"&LTS Calculator", self.action)
+        self.iface.addPluginToMenu(u"&LTS Toolbox", self.action)
 
         # QtCore.QObject.connect(self.dlg.ui.find_cc, QtCore.SIGNAL("clicked()"), self.find_connected_components)
         
@@ -312,6 +315,8 @@ class LTS:
         # QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("currentIndexChanged(int)"), self.update_lts_field)
         QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("activated (int)"), self.update_lts_field)
         QtCore.QObject.connect(self.dlg.ui.find_cc_Button,QtCore.SIGNAL("clicked()"), self.find_connected_components)
+        QtCore.QObject.connect(self.dlg.ui.find_connectivity_btn,QtCore.SIGNAL("clicked()"), self.compute_connectivity)
+
 
 
         self.update_ui()
@@ -322,7 +327,7 @@ class LTS:
 
     def unload(self):
         # Remove the plugin menu item and icon
-        self.iface.removePluginMenu(u"&LTS Calculator", self.action)
+        self.iface.removePluginMenu(u"&LTS Toolbox", self.action)
         self.iface.removeToolBarIcon(self.action)
 
     def update_ui(self):
@@ -588,6 +593,250 @@ class LTS:
         QgsMapLayerRegistry.instance().addMapLayer(vlayer)
         
         self.dlg.close()
+################################################################################
+
+
+    def compute_connectivity(self):
+        #################################### Inputs and Initiaizations#######################################
+        '''
+        Should get lts_column from a combobox
+        Networkx doesn't return a length if there is no path between the two points; it simply ignores it
+        '''
+
+        lts_column = "_lts11"
+
+        index = self.dlg.ui.road_combo.currentIndex() 
+        if index < 0:  
+            pass
+        else: 
+            rd_layer = self.dlg.ui.road_combo.itemData(index) 
+
+        index = self.dlg.ui.taz_combo.currentIndex() 
+        if index < 0:  
+            pass
+        else: 
+            tz_layer = self.dlg.ui.taz_combo.itemData(index) 
+
+        myfilepath= os.path.dirname( unicode( rd_layer.dataProvider().dataSourceUri() ) ) ;
+        layer_name = rd_layer.name()
+        path = myfilepath +"/"+layer_name+".shp"
+        # Get street network
+        road_layer = nx.read_shp(path)
+        
+        # Get TAZ layer
+        myfilepath= os.path.dirname( unicode( tz_layer.dataProvider().dataSourceUri() ) ) ;
+        layer_name = tz_layer.name()
+        path = myfilepath +"/"+layer_name+".shp" # or instead of all this: layer.source()
+        taz_layer = nx.read_shp(path)
+        qgis_taz_layer = tz_layer
+
+
+        maximum_distance = self.dlg.ui.maxDist.text()       # 1000 #in ft
+        minimum_distance = self.dlg.ui.minDist.text()       # 15 # in ft
+        detour_coeff = self.dlg.ui.Detour_coeff.text()      # 1.33 # if lts2.length <= 1.33 lts4.length : connected Detour_coeff
+
+        employment_connectivity = {}
+        population_connectivity = {}
+        for i in range(1,5): # for LTS 1:4
+            employment_connectivity.setdefault(i,0)
+            population_connectivity.setdefault(i,0)
+
+        time_1 = time.time()
+        self.dlg.ui.progress_text.setText("done Initiaizations")
+        # print "done Initiaizations",time_1 - start
+        ####################################################################################
+
+        c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points') # get intersection points
+        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points.shp", "points", "ogr")
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"Cycle_2_20",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"Cycle_2_14",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"TAZ_ID",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
+
+        # REMOVE DUPLICATES
+
+        node_layer = nx.read_shp("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\points.shp")
+        ### make a graph out of nodes and street layer
+        # Node graph with attributes
+        node_graph = node_layer.to_undirected()
+        # Street graph
+        street_graph = road_layer.to_undirected()
+        try:
+            del vlayer
+            del c
+            del node_layer
+
+        except Exception, e:
+            pass
+        time_2 = time.time()
+        self.dlg.ui.progress_text.append("done intersections")
+
+        ##################################################################
+        ### Select a subset of nodes for analysis ########################
+        taz_dic = {}
+        list_of_random_nodes = []
+        for node, attr in node_graph.nodes_iter(data=True):
+            taz_dic.setdefault(attr['TAZ_ID'],[]).append(node) 
+
+        for k,v in taz_dic.iteritems():
+            #k is taz, v is list of features within that taz
+            items=random.sample(v,min(5,len(v))) #choose 1 features
+            #defensive programming
+            if items is None:
+                print "taz ",k,"has no sample point! check to see if this is correct"
+                continue
+            for i in items:
+                list_of_random_nodes.append(i) 
+
+        time_3 = time.time()
+        self.dlg.ui.progress_text.append("done subset")
+
+        
+        ##################################################################
+
+        ### make a graph for each level of lts
+        lts_threshs = [1,2,3]
+        graph_lts1=[]; graph_lts2=[]; graph_lts3=[]
+        graph_names = [graph_lts1, graph_lts2, graph_lts3]
+        field = str(lts_column)
+
+        # another approach might be to create one graph at a time and do the analysis for that; more memory efficient???
+        for index,lts_thresh in enumerate(lts_threshs ): #fix this
+            temp = [(u,v,d) for u,v,d in street_graph.edges_iter(data=True) if d[field] <= lts_thresh]  # set the edges numbers to zero
+            graph_names[index] = nx.Graph(temp)
+            
+        time_4 = time.time()
+        self.dlg.ui.progress_text.append("done graphmaking")
+
+  
+
+        ### do the SP analysis
+        counter = 9
+        for node in list_of_random_nodes:
+            counter += 1
+            if counter == 100: print "100", time.time() - time_4
+            if counter == 1000 : print "100", time.time() - time_4
+            # Dictionary of shortest lengths keyed by target.{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+            try:
+                length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance) # or LTS4
+            except KeyError, e: # node not in that LTS network -> not connected
+                continue 
+            try:
+                length_lts3=nx.single_source_dijkstra_path_length(graph_names[2], node, weight='LEN', cutoff=maximum_distance) 
+            except KeyError, e: # node not in that LTS network -> not connected
+                continue 
+            try:
+                length_lts2=nx.single_source_dijkstra_path_length(graph_names[1], node, weight='LEN', cutoff=maximum_distance) 
+            except KeyError, e:
+                continue 
+            try:
+                length_lts1=nx.single_source_dijkstra_path_length(graph_names[0], node, weight='LEN', cutoff=maximum_distance) 
+            except KeyError, e:
+                continue 
+            
+
+            origin_pop = node_graph.node[node]['Pop'] # how long is it gonna take to find these nodes?
+
+            for dest, distance in length_lts1.iteritems():
+                if distance >= minimum_distance :
+                    if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        dest_pop = node_graph.node[dest]['Pop']
+                        dest_emp = node_graph.node[dest]['Emp']
+
+                        population_connectivity[1] += origin_pop * dest_pop
+                        employment_connectivity[1] += origin_pop * dest_emp
+            try:
+                del distance
+                del origin_pop
+                del dest_pop
+                del dest_emp
+                del length_lts1
+            except Exception, e:
+                pass
+
+
+            for dest, distance in length_lts2.iteritems():
+                if distance >= minimum_distance :
+                    if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
+                        
+                        dest_pop = node_graph.node[dest]['Pop']
+                        dest_emp = node_graph.node[dest]['Emp']
+
+                        population_connectivity[2] += origin_pop * dest_pop
+                        employment_connectivity[2] += origin_pop * dest_emp
+            try:
+                del distance
+                del origin_pop
+                del dest_pop
+                del dest_emp
+                del length_lts2
+            except Exception, e:
+                pass
+
+            for dest, distance in length_lts3.iteritems():
+                if distance >= minimum_distance :
+                    if distance <= detour_coeff * length_lts4[dest]: #what if there is no path btw two nodes? what will it return?
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        dest_pop = node_graph.node[dest]['Pop']
+                        dest_emp = node_graph.node[dest]['Emp']
+
+                        population_connectivity[3] += origin_pop * dest_pop
+                        employment_connectivity[3] += origin_pop * dest_emp
+
+            try:
+                del distance
+                del origin_pop
+                del dest_pop
+                del dest_emp
+                del length_lts3
+            except Exception, e:
+                pass
+
+            for dest, distance in length_lts4.iteritems():
+                if distance >= minimum_distance :
+                    
+                    # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                    dest_pop = node_graph.node[dest]['Pop']
+                    dest_emp = node_graph.node[dest]['Emp']
+
+                    population_connectivity[4] += origin_pop * dest_pop
+                    employment_connectivity[4] += origin_pop * dest_emp
+
+            try:
+                del distance
+                del origin_pop
+                del dest_pop
+                del dest_emp
+                del length_lts4
+            except Exception, e:
+                pass
+
+
+
+        time_5 = time.time()
+        self.dlg.ui.progress_text.append("Done!")
+        self.dlg.ui.progress_text.append("employment_connectivity[4] is " + str(employment_connectivity[4]))
+        self.dlg.ui.progress_text.append("population_connectivity[4] is " + str(population_connectivity[4]))
+
+
+        # SHOULD SAVE OUTPUT TO EXCEL FILE
+      
+
+
+
+
+
+
+
+
+
+
+
+
+##########################
 
 
     # run method that performs all the real work
@@ -603,6 +852,13 @@ class LTS:
         for layer in layers:
             if layer.type() == QgsMapLayer.VectorLayer and layer.geometryType() == QGis.Line:
                 self.dlg.ui.layerCombo.addItem( layer.name(), layer ) 
+                self.dlg.ui.road_combo.addItem( layer.name(), layer ) 
+            if layer.type() == QgsMapLayer.VectorLayer and layer.geometryType() == QGis.Polygon:
+                self.dlg.ui.taz_combo.addItem( layer.name(), layer ) 
+                
+
+
+
 
         self.update_lts_field()
         # Run the dialog event loop
@@ -614,24 +870,7 @@ class LTS:
             pass
 
 
-    def lets_Test(self):
-        for feature in layer.getFeatures():
-            numberOfLane = feature['NUMLANE']
-            lts = feature ['_lts12']
-            islLTS_1 = feature['_isl_lts1']
-            islLTS_2 = feature['_isl_lts2'] 
-            islLTS_3 = feature['_isl_lts3'] 
-            islLTS_4 = feature['_isl_lts4'] 
-            if lts ==1 : assert islLTS_1 > 0
-            elif lts ==2 :
-                assert islLTS_1 == 0
-                assert islLTS_2 > 0
-            elif lts ==3 :
-                assert islLTS_1 == islLTS_2 == 0
-                assert islLTS_3 > 0
-            elif lts ==4 :
-                assert islLTS_1 == islLTS_2 == islLTS_3 == 0
-                assert islLTS_4 > 0
+   
 
 
 

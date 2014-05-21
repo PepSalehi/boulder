@@ -117,7 +117,7 @@
      <x>70</x>
      <y>230</y>
      <width>531</width>
-     <height>271</height>
+     <height>301</height>
     </rect>
    </property>
    <property name="title">
@@ -126,7 +126,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>70</x>
       <y>20</y>
       <width>101</width>
       <height>16</height>
@@ -141,7 +141,7 @@
      <rect>
       <x>20</x>
       <y>40</y>
-      <width>141</width>
+      <width>181</width>
       <height>22</height>
      </rect>
     </property>
@@ -149,7 +149,7 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>70</x>
       <y>70</y>
       <width>111</width>
       <height>16</height>
@@ -164,77 +164,8 @@
      <rect>
       <x>20</x>
       <y>90</y>
-      <width>141</width>
+      <width>181</width>
       <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>30</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Minimum Distance</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>60</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Maximum Distance</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>90</y>
-      <width>101</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Detour Coefficient</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="minDist">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>30</y>
-      <width>113</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="maxDist">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>60</y>
-      <width>113</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="Detour_coeff">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>90</y>
-      <width>113</width>
-      <height>20</height>
      </rect>
     </property>
    </widget>
@@ -242,7 +173,7 @@
     <property name="geometry">
      <rect>
       <x>170</x>
-      <y>130</y>
+      <y>150</y>
       <width>171</width>
       <height>23</height>
      </rect>
@@ -255,7 +186,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>180</y>
+      <y>200</y>
       <width>231</width>
       <height>71</height>
      </rect>
@@ -268,7 +199,7 @@
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>160</y>
+      <y>180</y>
       <width>46</width>
       <height>13</height>
      </rect>
@@ -277,6 +208,103 @@
      <string>Progress</string>
     </property>
    </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>20</y>
+      <width>261</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Minimum Distance</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="maxDist">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>60</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="minDist">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>30</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="Detour_coeff">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>90</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Maximum Distance</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Detour Coefficient</string>
+     </property>
+    </widget>
+    <zorder>minDist</zorder>
+    <zorder>label_5</zorder>
+    <zorder>maxDist</zorder>
+    <zorder>minDist</zorder>
+    <zorder>Detour_coeff</zorder>
+    <zorder>label_6</zorder>
+    <zorder>label_7</zorder>
+   </widget>
+   <zorder>groupBox_2</zorder>
+   <zorder>label_3</zorder>
+   <zorder>road_combo</zorder>
+   <zorder>label_4</zorder>
+   <zorder>taz_combo</zorder>
+   <zorder>find_connectivity_btn</zorder>
+   <zorder>progress_text</zorder>
+   <zorder>label_8</zorder>
   </widget>
  </widget>
  <resources/>
