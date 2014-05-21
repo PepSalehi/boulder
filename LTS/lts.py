@@ -311,32 +311,14 @@ class LTS:
         QtCore.QObject.connect(self.dlg.ui.process_Button,QtCore.SIGNAL("clicked()"), self.process)
         # QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("currentIndexChanged(int)"), self.update_lts_field)
         QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("activated (int)"), self.update_lts_field)
-        # QtCore.QObject.connect(self.dlg.ui.find_cc_Button,QtCore.SIGNAL("clicked()"), self.find_connected_components)
-        QtCore.QObject.connect(self.dlg.ui.layerCombo, SIGNAL("valueChanged(PyQt_PyObject)"), self.find_cc, Qt.DirectConnection)
+        QtCore.QObject.connect(self.dlg.ui.find_cc_Button,QtCore.SIGNAL("clicked()"), self.find_connected_components)
+
 
         self.update_ui()
         self.layers = self.iface.legendInterface().layers()  # store the layer list 
         # self.dlg.ui.layerCombo.clear()  # clear the combo 
         for layer in self.layers:    # foreach layer in legend 
             self.dlg.ui.layerCombo.addItem( layer.name() )    # add it to the combo 
-
-
-
-        self.update_lts_field()
-
-        self.WorkerThread = WorkerThread()
-        # QtCore.QObject.connect(self.dlg.ui.find_cc_Button,QtCore.SIGNAL("clicked()"), self.find_connected_components)
-        self.dlg.ui.find_cc_Button.clicked.connect(lambda: self.find_cc())  
-
-    def set_layer(self,layer):
-        self.layer = layer      
-
-    def find_cc(self,layer):
-
-        self.WorkerThread.start() # I want to pass the layer to this thread
-
-
-
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -380,9 +362,6 @@ class LTS:
                 self.dlg.ui.lts_combo.addItem(str(attr), attr) 
         except:
             pass
-
-
-
 
     def process(self):
         """ Calculates Level of Traffic Stress for the selected layer"""
@@ -525,7 +504,7 @@ class LTS:
         self.dlg.close()
 
 
-    def find_connected_components(self,layer):
+    def find_connected_components(self):
         """finds "islands" in the network """
         index = self.dlg.ui.layerCombo.currentIndex() 
         if index < 0: 
@@ -533,7 +512,7 @@ class LTS:
             pass
         else: 
             layer = self.dlg.ui.layerCombo.itemData(index) 
-        layer = QgsVectorLayer(self.fileName, "layer_name", "ogr")
+        # layer = QgsVectorLayer(self.fileName, "layer_name", "ogr")
 
 
         index = self.dlg.ui.lts_combo.currentIndex() 
@@ -625,14 +604,6 @@ class LTS:
             if layer.type() == QgsMapLayer.VectorLayer and layer.geometryType() == QGis.Line:
                 self.dlg.ui.layerCombo.addItem( layer.name(), layer ) 
 
-
-        index = self.dlg.ui.layerCombo.currentIndex() 
-        if index < 0: 
-            # it may occur if there's no layer in the combo/legend 
-            pass
-        else: 
-            layer = self.dlg.ui.layerCombo.itemData(index) 
-            self.emit(SIGNAL("valueChanged(PyQt_PyObject)"),layer)
         self.update_lts_field()
         # Run the dialog event loop
         result = self.dlg.exec_()
@@ -641,6 +612,28 @@ class LTS:
             # do something useful (delete the line containing pass and
             # substitute with your code)
             pass
+
+
+    def lets_Test(self):
+        for feature in layer.getFeatures():
+            numberOfLane = feature['NUMLANE']
+            lts = feature ['_lts12']
+            islLTS_1 = feature['_isl_lts1']
+            islLTS_2 = feature['_isl_lts2'] 
+            islLTS_3 = feature['_isl_lts3'] 
+            islLTS_4 = feature['_isl_lts4'] 
+            if lts ==1 : assert islLTS_1 > 0
+            elif lts ==2 :
+                assert islLTS_1 == 0
+                assert islLTS_2 > 0
+            elif lts ==3 :
+                assert islLTS_1 == islLTS_2 == 0
+                assert islLTS_3 > 0
+            elif lts ==4 :
+                assert islLTS_1 == islLTS_2 == islLTS_3 == 0
+                assert islLTS_4 > 0
+
+
 
 #############################################################################################################
 class street_link_object(object):
@@ -763,7 +756,7 @@ class street_link_object(object):
         # orig_num_lane= self.num_lane
         ##############
         skip = False
-        if not self.one_way:  #it's 2 way
+        if (not self.one_way) or (self.one_way == "None"):  #it's 2 way 
             self.num_lane = floor(self.num_lane/2)
         #####
         # for now, cl_guess is always none
@@ -779,8 +772,8 @@ class street_link_object(object):
         else:
             self.bike_lane =0
 
-        if self.cross_LTS != NULL:
-            update_LTS(int(self.cross_LTS))
+        # if self.cross_LTS != NULL: # what is this?
+        #     update_LTS(int(self.cross_LTS))
 
         if self.override != None:
             self.LTS = self.override
@@ -903,111 +896,4 @@ class street_link_object(object):
     #############################################################################################################
     ##################### End of Street Class #####################
     #############################################################################################################
-class WorkerThread(QThread):
-    """docstring for WorkerThread"""
-    def __init__(self):
-        super(WorkerThread, self).__init__()
-        # self.arg = arg
 
-    def make_column(self,layer,name):
-        index = layer.fieldNameIndex(str(name))
-        if index == -1: # field doesn't exist
-            caps = layer.dataProvider().capabilities()
-            if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField(str(name), \
-                QVariant.Int) ] )
-            layer.updateFields()
-            return 0  # so I know if the column already existed or did I create it for the first time
-        return 1
-
-
-    def run(): #does the job
-        self.find_connected_components()
-
-
-    def find_connected_components(self):
-        """finds "islands" in the network """
-        index = self.dlg.ui.layerCombo.currentIndex() 
-        if index < 0: 
-            # it may occur if there's no layer in the combo/legend 
-            pass
-        else: 
-            layer = self.dlg.ui.layerCombo.itemData(index) 
-        # layer = QgsVectorLayer(self.fileName, "layer_name", "ogr")
-
-
-        index = self.dlg.ui.lts_combo.currentIndex() 
-        if index < 0: 
-            # it may occur if there's no layer in the combo/legend 
-            pass
-        else: 
-            lts_column = self.dlg.ui.lts_combo.itemData(index) 
-        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","w")as file:
-        #     file.write(lts_column +"\n")
-            
-        lts1_existed = self.make_column(layer,"_isl_lts1")
-        lts2_existed = self.make_column(layer,"_isl_lts2")
-        lts3_existed = self.make_column(layer,"_isl_lts3")
-        lts4_existed = self.make_column(layer,"_isl_lts4")
-        # path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter/for_test.shp"
-        # out_path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter"
-        # get the path from selected layer
-        myfilepath= os.path.dirname( unicode( layer.dataProvider().dataSourceUri() ) ) ;
-        layer_name = layer.name()
-        path2 = myfilepath +"/"+layer_name+".shp"
-        out_path = myfilepath
-        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","a")as file:
-        #     file.write(path2 +"\n")
-        # ##
-        # path3="C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter/BoulderStreetsWProjection_20140407_Joined.shp"
-        layer2 = nx.read_shp(str(path2))
-
-        self.dlg.ui.progressBar.setValue(5)
-        G=layer2.to_undirected()
-        self.dlg.ui.progressBar.setValue(10)
-
-        lts_threshs = [(1,"_isl_lts1"),(2,"_isl_lts2"),(3,"_isl_lts3"),(4,"_isl_lts4")]
-        field = str(lts_column)
-        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","a")as file:
-        #     file.write(field +"\n")
-        prog =0
-        for lts_thresh,attr in (lts_threshs):
-            prog +=1
-            temp = [(u,v,d) for u,v,d in G.edges_iter(data=True) if d[field] <= lts_thresh]  # set the edges numbers to zero
-            g2 = nx.Graph(temp)
-            H=nx.connected_component_subgraphs(g2)
-
-            for idx, cc in enumerate(H):
-                for edge in cc.edges(data=True):
-                    G[edge[0]][edge[1]][attr]=idx+1 # zero means it was filtered out
-            j= prog * 20
-            self.dlg.ui.progressBar.setValue(j)
-
-        # order attributes table
-        for index, edge in enumerate (G.edges(data=True)):
-            edge = list(edge)
-            edge[2] = OrderedDict(sorted(edge[2].items()))
-            edge=tuple(edge)
-            G[edge[0]][edge[1]] = edge[2] 
-
-
-        self.remove_column(layer,"_isl_lts1",lts1_existed)
-        self.remove_column(layer,"_isl_lts2",lts2_existed)
-        self.remove_column(layer,"_isl_lts3",lts3_existed)
-        self.remove_column(layer,"_isl_lts4",lts4_existed)
-
-
-        out_name =str(layer_name+"_with islands")
-        write_shp(G,out_path,out_name)
-        self.dlg.ui.progressBar.setValue(100)
-        QMessageBox.information(self.dlg, ("Successful"), ("A new shapefile "+ out_name+" has been created in your folder"))  
-        # Add to TOC
-        vlayer = QgsVectorLayer(out_path +"/"+out_name+".shp",out_name,"ogr")
-        #get crs of project
-        actual_crs = iface.mapCanvas().mapRenderer().destinationCrs()
-        #change crs of layer
-        vlayer.setCrs(actual_crs)
-
-        QgsMapLayerRegistry.instance().addMapLayer(vlayer)
-        
-        self.dlg.close()
