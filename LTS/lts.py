@@ -27,6 +27,7 @@ from qgis.core import *
 from qgis.utils import iface
 # Initialize Qt resources from file resources.py
 import resources_rc
+
 # Import the code for the dialog
 from ltsdialog import LTSDialog
 from ui_lts import Ui_Dialog
@@ -39,6 +40,7 @@ import os
 import processing
 import random
 import time 
+import csv
 ############## read or write shapefiles
 """
 *********
@@ -823,17 +825,26 @@ class LTS:
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
-      
+        writefile = myfilepath+'/result.csv'
+        fieldnames = ['LTS level','population_connectivity', 'employment_connectivity']
+        with open( writefile, 'w' ) as f:
+            writer = csv.writer(f)
+            writer.writerow(fieldnames)
+            for i in range(1,5):
+                writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
 
-
-
-
-
-
-
-
-
-
+##################
+# writer = csv.writer(open('dict.csv', 'wb'))
+# for key, value in mydict.items():
+#    writer.writerow([key, value])
+# ##################
+# writefile = '../test.csv'
+# fieldnames = ['data1','data2', 'data3']
+# with open( writefile, 'w' ) as f:
+#     writer = csv.writer(f)
+#     writer.writerow(fieldnames)
+#     writer.writerows(zip(data1, data2, data3))
+####################################
 
 
 ##########################
