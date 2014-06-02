@@ -583,8 +583,11 @@ class LTS:
 
         out_name =str(layer_name+"_with islands")
         write_shp(G,out_path,out_name)
+        self.dlg.ui.progressBar.setValue(99)
+
+        QMessageBox.information(self.dlg, ("Successful"), ("A new shapefile "+ out_name+" has been created in your folder")) 
         self.dlg.ui.progressBar.setValue(100)
-        QMessageBox.information(self.dlg, ("Successful"), ("A new shapefile "+ out_name+" has been created in your folder"))  
+
         # Add to TOC
         vlayer = QgsVectorLayer(out_path +"/"+out_name+".shp",out_name,"ogr")
         #get crs of project
@@ -650,16 +653,22 @@ class LTS:
 
         c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points') # get intersection points
         vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points.shp", "points", "ogr")
-        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"Cycle_2_20",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
-        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"Cycle_2_14",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
-        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"TAZ_ID",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points')
 
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"taz2010_PO",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points1')
+        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points1.shp", "points1", "ogr")
+
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"taz2010_EM",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points2')
+        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points2.shp", "points2", "ogr")
+
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"TAZ_ID",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points3')
+        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points3.shp", "points3", "ogr")
         # REMOVE DUPLICATES
+        c=processing.runalg("saga:removeduplicatepoints",vlayer,"ID_SHAPE",0,0,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points4')
 
-        node_layer = nx.read_shp("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\points.shp")
+        node_layer = nx.read_shp("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\points4.shp")
         ### make a graph out of nodes and street layer
         # Node graph with attributes
         node_graph = node_layer.to_undirected()
@@ -717,9 +726,9 @@ class LTS:
         ### do the SP analysis
         counter = 9
         for node in list_of_random_nodes:
-            counter += 1
-            if counter == 100: print "100", time.time() - time_4
-            if counter == 1000 : print "100", time.time() - time_4
+            # counter += 1
+            # if counter == 100: print "100", time.time() - time_4
+            # if counter == 1000 : print "100", time.time() - time_4
             # Dictionary of shortest lengths keyed by target.{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
             try:
                 length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance) # or LTS4
@@ -739,20 +748,20 @@ class LTS:
                 continue 
             
 
-            origin_pop = node_graph.node[node]['Pop'] # how long is it gonna take to find these nodes?
+            origin_pop = node_graph.node[node]['TAZ2010_PO'] # how long is it gonna take to find these nodes?
 
             for dest, distance in length_lts1.iteritems():
                 if distance >= minimum_distance :
                     if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                        dest_pop = node_graph.node[dest]['Pop']
-                        dest_emp = node_graph.node[dest]['Emp']
+                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
 
                         population_connectivity[1] += origin_pop * dest_pop
                         employment_connectivity[1] += origin_pop * dest_emp
             try:
                 del distance
-                del origin_pop
+                # del origin_pop
                 del dest_pop
                 del dest_emp
                 del length_lts1
@@ -764,14 +773,14 @@ class LTS:
                 if distance >= minimum_distance :
                     if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
                         
-                        dest_pop = node_graph.node[dest]['Pop']
-                        dest_emp = node_graph.node[dest]['Emp']
+                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
 
                         population_connectivity[2] += origin_pop * dest_pop
                         employment_connectivity[2] += origin_pop * dest_emp
             try:
                 del distance
-                del origin_pop
+                # del origin_pop
                 del dest_pop
                 del dest_emp
                 del length_lts2
@@ -782,15 +791,15 @@ class LTS:
                 if distance >= minimum_distance :
                     if distance <= detour_coeff * length_lts4[dest]: #what if there is no path btw two nodes? what will it return?
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                        dest_pop = node_graph.node[dest]['Pop']
-                        dest_emp = node_graph.node[dest]['Emp']
+                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
 
                         population_connectivity[3] += origin_pop * dest_pop
                         employment_connectivity[3] += origin_pop * dest_emp
 
             try:
                 del distance
-                del origin_pop
+                # del origin_pop
                 del dest_pop
                 del dest_emp
                 del length_lts3
@@ -801,15 +810,15 @@ class LTS:
                 if distance >= minimum_distance :
                     
                     # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                    dest_pop = node_graph.node[dest]['Pop']
-                    dest_emp = node_graph.node[dest]['Emp']
+                    dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                    dest_emp = node_graph.node[dest]['TAZ2010_EM']
 
                     population_connectivity[4] += origin_pop * dest_pop
                     employment_connectivity[4] += origin_pop * dest_emp
 
             try:
                 del distance
-                del origin_pop
+                # del origin_pop
                 del dest_pop
                 del dest_emp
                 del length_lts4
