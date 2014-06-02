@@ -390,33 +390,33 @@ class LTS:
 
         # Should really put these in a function
 
-        index = layer.fieldNameIndex("_lts")
+        # index = layer.fieldNameIndex("qLts")
+        # if index == -1: # field doesn't exist
+        #     caps = layer.dataProvider().capabilities()
+        #     if caps & QgsVectorDataProvider.AddAttributes:
+        #       res = layer.dataProvider().addAttributes( [ QgsField("qLts", \
+        #         QVariant.Int) ] )
+        #     layer.updateFields()
+        index = layer.fieldNameIndex("qNum_lane")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts", \
-                QVariant.Int) ] )
-            layer.updateFields()
-        index = layer.fieldNameIndex("_num_lane")
-        if index == -1: # field doesn't exist
-            caps = layer.dataProvider().capabilities()
-            if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_num_lane", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qNum_lane", \
                 QVariant.Int) ] )
             layer.updateFields()
 
-        index = layer.fieldNameIndex("_protected")
+        index = layer.fieldNameIndex("qProtected")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_protected", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qProtected", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_bike_lane")
+        index = layer.fieldNameIndex("qBike_lane")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_bike_lane", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qBike_lane", \
                 QVariant.Int) ] )
             layer.updateFields()
         index = layer.fieldNameIndex("CROSSINGME")
@@ -426,41 +426,41 @@ class LTS:
               res = layer.dataProvider().addAttributes( [ QgsField("CROSSINGME", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts11")
+        index = layer.fieldNameIndex("qLts11")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts11", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts11", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts12")
+        index = layer.fieldNameIndex("qLts12")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts12", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts12", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts13")
+        index = layer.fieldNameIndex("qLts13")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts13", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts13", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts_woX")
+        index = layer.fieldNameIndex("qLts_woX")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts_woX", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts_woX", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("LTS")
-        if index == -1: # field doesn't exist
-            caps = layer.dataProvider().capabilities()
-            if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("LTS", \
-                QVariant.Int) ] )
-            layer.updateFields()
+        # index = layer.fieldNameIndex("LTS")
+        # if index == -1: # field doesn't exist
+        #     caps = layer.dataProvider().capabilities()
+        #     if caps & QgsVectorDataProvider.AddAttributes:
+        #       res = layer.dataProvider().addAttributes( [ QgsField("LTS", \
+        #         QVariant.Int) ] )
+        #     layer.updateFields()
 
 
 
@@ -483,7 +483,7 @@ class LTS:
             street.pocket_lane_shift = feature['RTLANSHIFT']
             street.right_turn_lane_length = feature['RTPOCKLENG']
             street.one_way = feature['ONEWAY']
-            street.raw_cross_stress = feature['_rawCrossS']
+            street.raw_cross_stress = feature['qRawCrossS']
             street.cross_treat = feature['CrossTreat']
 
             street.calculate_crossing_me(street.num_lane) # has to always be before computing lts
@@ -492,14 +492,14 @@ class LTS:
                 i+=1
                 j=ceil(i/(nFeat/100))
                 self.dlg.ui.progress_bar.setValue(j)
-            feature["_lts_woX"] = street.LTS
-            feature["_lts"] = street.LTS
-            feature["_lts11"] = street.lts11
-            feature["_lts12"] = street.lts12
-            feature["_lts13"] = street.lts13
-            feature["_num_lane"] = street.num_lane
-            feature["_bike_lane"] = street.bike_lane
-            feature["_protected"] = street.protected
+            feature["qLts_woX"] = street.LTS
+            # feature["qLts"] = street.LTS
+            feature["qLts11"] = street.lts11
+            feature["qLts12"] = street.lts12
+            feature["qLts13"] = street.lts13
+            feature["qNum_lane"] = street.num_lane
+            feature["qBike_lane"] = street.bike_lane
+            feature["qProtected"] = street.protected
             feature["CROSSINGME"] = street.crossing_me
             layer.updateFeature(feature)
         # layer.updateFields()
@@ -531,10 +531,10 @@ class LTS:
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","w")as file:
         #     file.write(lts_column +"\n")
             
-        lts1_existed = self.make_column(layer,"_isl_lts1")
-        lts2_existed = self.make_column(layer,"_isl_lts2")
-        lts3_existed = self.make_column(layer,"_isl_lts3")
-        lts4_existed = self.make_column(layer,"_isl_lts4")
+        lts1_existed = self.make_column(layer,"qIsl_lts1")
+        lts2_existed = self.make_column(layer,"qIsl_lts2")
+        lts3_existed = self.make_column(layer,"qIsl_lts3")
+        lts4_existed = self.make_column(layer,"qIsl_lts4")
         # path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter/for_test.shp"
         # out_path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter"
         # get the path from selected layer
@@ -550,7 +550,7 @@ class LTS:
         self.dlg.ui.progressBar.setValue(5)
         G=layer2.to_undirected()
         self.dlg.ui.progressBar.setValue(10)
-        lts_threshs = [(1,"_isl_lts1"),(2,"_isl_lts2"),(3,"_isl_lts3"),(4,"_isl_lts4")]
+        lts_threshs = [(1,"qIsl_lts1"),(2,"qIsl_lts2"),(3,"qIsl_lts3"),(4,"qIsl_lts4")]
         field = str(lts_column)
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","a")as file:
         #     file.write(field +"\n")
@@ -575,10 +575,10 @@ class LTS:
             G[edge[0]][edge[1]] = edge[2] 
 
 
-        self.remove_column(layer,"_isl_lts1",lts1_existed)
-        self.remove_column(layer,"_isl_lts2",lts2_existed)
-        self.remove_column(layer,"_isl_lts3",lts3_existed)
-        self.remove_column(layer,"_isl_lts4",lts4_existed)
+        self.remove_column(layer,"qIsl_lts1",lts1_existed)
+        self.remove_column(layer,"qIsl_lts2",lts2_existed)
+        self.remove_column(layer,"qIsl_lts3",lts3_existed)
+        self.remove_column(layer,"qIsl_lts4",lts4_existed)
 
 
         out_name =str(layer_name+"_with islands")
@@ -605,7 +605,7 @@ class LTS:
         Networkx doesn't return a length if there is no path between the two points; it simply ignores it
         '''
 
-        lts_column = "_lts11"
+        lts_column = "qLts11"
 
         index = self.dlg.ui.road_combo.currentIndex() 
         if index < 0:  
@@ -832,19 +832,6 @@ class LTS:
             writer.writerow(fieldnames)
             for i in range(1,5):
                 writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
-
-##################
-# writer = csv.writer(open('dict.csv', 'wb'))
-# for key, value in mydict.items():
-#    writer.writerow([key, value])
-# ##################
-# writefile = '../test.csv'
-# fieldnames = ['data1','data2', 'data3']
-# with open( writefile, 'w' ) as f:
-#     writer = csv.writer(f)
-#     writer.writerow(fieldnames)
-#     writer.writerows(zip(data1, data2, data3))
-####################################
 
 
 ##########################
