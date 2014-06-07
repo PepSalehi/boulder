@@ -41,6 +41,7 @@ import processing
 import random
 import time 
 import csv
+import cPickle as pickle
 ############## read or write shapefiles
 """
 *********
@@ -601,6 +602,21 @@ class LTS:
 ################################################################################
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def compute_connectivity(self):
         #################################### Inputs and Initiaizations#######################################
         '''
@@ -608,7 +624,7 @@ class LTS:
         Networkx doesn't return a length if there is no path between the two points; it simply ignores it
         '''
 
-        lts_column = "qLts11"
+        lts_column = "qLts12"
 
         index = self.dlg.ui.road_combo.currentIndex() 
         if index < 0:  
@@ -626,25 +642,33 @@ class LTS:
         layer_name = rd_layer.name()
         path = myfilepath +"/"+layer_name+".shp"
         # Get street network
-        road_layer = nx.read_shp(path)
+        road_layer = nx.read_shp(str(path))
         
         # Get TAZ layer
         myfilepath= os.path.dirname( unicode( tz_layer.dataProvider().dataSourceUri() ) ) ;
         layer_name = tz_layer.name()
         path = myfilepath +"/"+layer_name+".shp" # or instead of all this: layer.source()
-        taz_layer = nx.read_shp(path)
+        # taz_layer = nx.read_shp(path)
         qgis_taz_layer = tz_layer
 
+        total_pop = 0.0; total_emp = 0.0
+        for g in qgis_taz_layer.getFeatures():
+            total_pop += g['taz2010_Po']
+            total_emp += g['taz2010_Em']
 
-        maximum_distance = self.dlg.ui.maxDist.text()       # 1000 #in ft
-        minimum_distance = self.dlg.ui.minDist.text()       # 15 # in ft
-        detour_coeff = self.dlg.ui.Detour_coeff.text()      # 1.33 # if lts2.length <= 1.33 lts4.length : connected Detour_coeff
+        maximum_distance = int(self.dlg.ui.maxDist.text())       # 1000 #in ft
+        minimum_distance = int(self.dlg.ui.minDist.text())       # 15 # in ft
+        detour_coeff = float(self.dlg.ui.Detour_coeff.text())      # 1.33 # if lts2.length <= 1.33 lts4.length : connected Detour_coeff
 
+        disconnected_pop = {}
+        disconnected_emp = {}
         employment_connectivity = {}
         population_connectivity = {}
         for i in range(1,5): # for LTS 1:4
-            employment_connectivity.setdefault(i,0)
-            population_connectivity.setdefault(i,0)
+            employment_connectivity.setdefault(i,0.0)
+            population_connectivity.setdefault(i,0.0)
+            disconnected_pop.setdefault(i,0.0)
+            disconnected_emp.setdefault(i,0.0)
 
         time_1 = time.time()
         self.dlg.ui.progress_text.setText("done Initiaizations")
@@ -674,35 +698,65 @@ class LTS:
         node_graph = node_layer.to_undirected()
         # Street graph
         street_graph = road_layer.to_undirected()
-        try:
-            del vlayer
-            del c
-            del node_layer
+        # try:
+        #     del vlayer
+        #     del c
+        #     del node_layer
 
-        except Exception, e:
-            pass
+        # except Exception, e:
+        #     pass
         time_2 = time.time()
         self.dlg.ui.progress_text.append("done intersections")
 
         ##################################################################
         ### Select a subset of nodes for analysis ########################
         taz_dic = {}
-        list_of_random_nodes = []
+        # list_of_random_nodes = []
         for node, attr in node_graph.nodes_iter(data=True):
             taz_dic.setdefault(attr['TAZ_ID'],[]).append(node) 
+        try:
+            del taz_dic[0.0]
+        except:
+            pass
+        # self.dlg.ui.progress_text.append(str(len(taz_dic)))
 
-        for k,v in taz_dic.iteritems():
-            #k is taz, v is list of features within that taz
-            items=random.sample(v,min(5,len(v))) #choose 1 features
-            #defensive programming
-            if items is None:
-                print "taz ",k,"has no sample point! check to see if this is correct"
-                continue
-            for i in items:
-                list_of_random_nodes.append(i) 
+        selected_nodes = []
+        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\taz_dic.txt","w") as file:
+            pickle.dump(taz_dic,file)
+        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\street_graph.txt","w") as file:
+            pickle.dump(street_graph,file)
+        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\node_graph.txt","w") as file:
+            pickle.dump(node_graph,file)
+
+
+
+        for taz, list_of_nodes in taz_dic.iteritems():
+            number_of_points = min(1,len(list_of_nodes) )
+            passed_nodes = 0
+            for i in range( number_of_points*5 ): # check 5 times more points
+                if passed_nodes >= number_of_points: 
+                    break
+                item = random.sample(list_of_nodes, 1) #choose 10 features
+                if item[0] in street_graph.nodes():
+                    passed_nodes += 1
+                    selected_nodes.extend(item)
+
 
         time_3 = time.time()
+        self.dlg.ui.progress_text.append("length of selected_nodes")
+        self.dlg.ui.progress_text.append(str(len(selected_nodes)))
+
         self.dlg.ui.progress_text.append("done subset")
+
+        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
+            pickle.dump(selected_nodes,file)
+        #####
+        # some analysis of average network connectivity
+        # node_info1 = {}; node_info2 = {}; node_info3 = {}; node_info4 = {}; 
+        # all_cons_nodes = {} # node: population
+        ### do the SP analysis
+        # missing_nodes1=0; missing_nodes2=0; missing_nodes3=0; missing_nodes4=0;
+        # runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
 
         
         ##################################################################
@@ -721,109 +775,217 @@ class LTS:
         time_4 = time.time()
         self.dlg.ui.progress_text.append("done graphmaking")
 
-  
+        counter = 0
+        
 
         ### do the SP analysis
-        counter = 9
-        for node in list_of_random_nodes:
-            # counter += 1
-            # if counter == 100: print "100", time.time() - time_4
-            # if counter == 1000 : print "100", time.time() - time_4
+        for node in selected_nodes:
+
+            ###########
+            # all_cons_nodes[node] = node_graph.node[node]['TAZ2010_PO']/total_pop
+            ###########
+            pnts1 = 0; pnts2 = 0; pnts3 = 0; pnts4 = 0;
+            runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
+
+            counter += 1
+            if counter == 100 : print "100", time.time() - time_4
+            if counter == 300 : print "300", time.time() - time_4
+            if counter == 600 : print "600", time.time() - time_4
+            if counter == 900 : print "900", time.time() - time_4
+            if counter == 1100 : print "1100", time.time() - time_4
+            if counter == 1500 : print "1500", time.time() - time_4
+
+
+
+
             # Dictionary of shortest lengths keyed by target.{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
-            try:
-                length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance) # or LTS4
-            except KeyError, e: # node not in that LTS network -> not connected
-                continue 
-            try:
-                length_lts3=nx.single_source_dijkstra_path_length(graph_names[2], node, weight='LEN', cutoff=maximum_distance) 
-            except KeyError, e: # node not in that LTS network -> not connected
-                continue 
-            try:
-                length_lts2=nx.single_source_dijkstra_path_length(graph_names[1], node, weight='LEN', cutoff=maximum_distance) 
-            except KeyError, e:
-                continue 
-            try:
-                length_lts1=nx.single_source_dijkstra_path_length(graph_names[0], node, weight='LEN', cutoff=maximum_distance) 
-            except KeyError, e:
-                continue 
-            
+            if pnts4 < 5 : # this is just to make sure that the selected node is not one of the 89 nodes that are "extra" in node layer
+                try:
+                    length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance)
+                    # node_info4[node] = len (length_lts4.keys())
+                    pnts4 += 1
+                    runLTS4 = True
+                except Exception, e: # node not in that LTS network -> not connected
+                    # missing_nodes4 += 1                                                 
+                    continue  # if it's not in LTS4 graph, then it is not in the others either, so just "continue" to the next one
 
-            origin_pop = node_graph.node[node]['TAZ2010_PO'] # how long is it gonna take to find these nodes?
+            if pnts3 < 5 :
+                try:
+                    length_lts3=nx.single_source_dijkstra_path_length(graph_names[2], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info3[node] = len (length_lts3.keys())
+                    pnts3 += 1
+                    runLTS3 = True
+                except Exception, e: # node not in that LTS network -> not connected
+                    # missing_nodes3 += 1  
+                    pass
+                     
+            if pnts2 < 5 :
+                try:
+                    length_lts2=nx.single_source_dijkstra_path_length(graph_names[1], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info2[node] = len (length_lts2.keys())
+                    pnts2 += 1
+                    runLTS2 = True
 
-            for dest, distance in length_lts1.iteritems():
-                if distance >= minimum_distance :
-                    if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
-                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                except Exception, e:
+                    pass
+                    # missing_nodes2 += 1                                                 
+                     
+            if pnts1 < 5 :  
+                try:
+                    length_lts1=nx.single_source_dijkstra_path_length(graph_names[0], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info1[node] = len (length_lts1.keys())
+                    pnts1 += 1
+                    runLTS1 = True
 
-                        population_connectivity[1] += origin_pop * dest_pop
-                        employment_connectivity[1] += origin_pop * dest_emp
-            try:
-                del distance
-                # del origin_pop
-                del dest_pop
-                del dest_emp
-                del length_lts1
-            except Exception, e:
-                pass
-
-
-            for dest, distance in length_lts2.iteritems():
-                if distance >= minimum_distance :
-                    if distance <= detour_coeff * length_lts4[dest]: # what if there is no path btw two nodes? what will it return?
-                        
-                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
-
-                        population_connectivity[2] += origin_pop * dest_pop
-                        employment_connectivity[2] += origin_pop * dest_emp
-            try:
-                del distance
-                # del origin_pop
-                del dest_pop
-                del dest_emp
-                del length_lts2
-            except Exception, e:
-                pass
-
-            for dest, distance in length_lts3.iteritems():
-                if distance >= minimum_distance :
-                    if distance <= detour_coeff * length_lts4[dest]: #what if there is no path btw two nodes? what will it return?
-                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                        dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                        dest_emp = node_graph.node[dest]['TAZ2010_EM']
-
-                        population_connectivity[3] += origin_pop * dest_pop
-                        employment_connectivity[3] += origin_pop * dest_emp
-
-            try:
-                del distance
-                # del origin_pop
-                del dest_pop
-                del dest_emp
-                del length_lts3
-            except Exception, e:
-                pass
-
-            for dest, distance in length_lts4.iteritems():
-                if distance >= minimum_distance :
+                except Exception, e:
+                    # missing_nodes1 += 1 
+                    pass                                                
                     
-                    # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                    dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                    dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                
 
-                    population_connectivity[4] += origin_pop * dest_pop
-                    employment_connectivity[4] += origin_pop * dest_emp
+            origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop # how long is it gonna take to find these nodes?
+            assert origin_pop >= 0, "negative Origin Population"
 
-            try:
-                del distance
-                # del origin_pop
-                del dest_pop
-                del dest_emp
-                del length_lts4
-            except Exception, e:
-                pass
+            if runLTS1:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts1[dest]
+                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
+
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
+
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[1] += origin_pop * dest_pop
+                                employment_connectivity[1] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[1] += origin_pop * dest_pop
+                                disconnected_emp[1] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
+                    
+
+            if runLTS2:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts2[dest]
+                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
+
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
+
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[2] += origin_pop * dest_pop
+                                employment_connectivity[2] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[2] += origin_pop * dest_pop
+                                disconnected_emp[2] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
+                    
+            if runLTS3:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts3[dest]
+                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
+
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
+
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[3] += origin_pop * dest_pop
+                                employment_connectivity[3] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[3] += origin_pop * dest_pop
+                                disconnected_emp[3] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
+                    
+            if runLTS4:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts4[dest]
+                            if distance >= minimum_distance :
+
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
+
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
+
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[4] += origin_pop * dest_pop
+                                employment_connectivity[4] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[4] += origin_pop * dest_pop
+                                disconnected_emp[4] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
 
 
 
@@ -854,6 +1016,9 @@ class LTS:
         self.dlg.ui.progressBar.setValue(0)
         self.dlg.ui.layerCombo.clear()
         self.dlg.ui.lts_combo.clear()
+        self.dlg.ui.road_combo.clear()
+        self.dlg.ui.taz_combo.clear()
+
 
         layers = QgsMapLayerRegistry.instance().mapLayers().values()
         for layer in layers:
