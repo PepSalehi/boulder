@@ -41,18 +41,26 @@ class LTSDialog(QtGui.QDialog, Ui_Dialog):
         self.ui.progress_bar.setValue(0)
         self.ui.progressBar.setValue(0)
         self.setWindowTitle(("LTS Toolbox"))
+        self.ui.minDist.setText("15")
+        self.ui.maxDist.setText("100000")
+        self.ui.Detour_coeff.setText("1.33")
+
+
+
+
+
         # self.layers = self.iface.legendInterface().layers()  # store the layer list 
         
         # for layer in self.layers:    # foreach layer in legend 
         #     self.dlg.ui.layerCombo.addItem( layer.name() )  
         # self.populate_layers()
-    def populate_layers(self):
-        layerlist = []
-        self.ui.layerCombo.clear()  # clear the combo 
-        layermap = QgsMapLayerRegistry.instance().mapLayers()
-        for name, layer in layermap.iteritems():
-            if layer.type() == QgsMapLayer.VectorLayer:
-                if layer.geometryType() == QGis.Line:
-                    layerlist.append( unicode( layer.name() ) )
-        for layer in layerlist:    # foreach layer in legend 
-            self.ui.layerCombo.addItem( layer )  
+    # def populate_layers(self):
+    #     layerlist = []
+    #     self.ui.layerCombo.clear()  # clear the combo 
+    #     layermap = QgsMapLayerRegistry.instance().mapLayers()
+    #     for name, layer in layermap.iteritems():
+    #         if layer.type() == QgsMapLayer.VectorLayer:
+    #             if layer.geometryType() == QGis.Line:
+    #                 layerlist.append( unicode( layer.name() ) )
+    #     for layer in layerlist:    # foreach layer in legend 
+    #         self.ui.layerCombo.addItem( layer )  

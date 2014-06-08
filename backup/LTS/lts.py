@@ -298,13 +298,13 @@ class LTS:
         # Create action that will start plugin configuration
         self.action = QAction(
             QIcon(":/plugins/lts/icon.png"),
-            u"LTS calculator", self.iface.mainWindow())
+            u"LTS Toolbox", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
 
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu(u"&LTS Calculator", self.action)
+        self.iface.addPluginToMenu(u"&LTS Toolbox", self.action)
 
         # QtCore.QObject.connect(self.dlg.ui.find_cc, QtCore.SIGNAL("clicked()"), self.find_connected_components)
         
@@ -322,7 +322,7 @@ class LTS:
 
     def unload(self):
         # Remove the plugin menu item and icon
-        self.iface.removePluginMenu(u"&LTS Calculator", self.action)
+        self.iface.removePluginMenu(u"&LTS Toolbox", self.action)
         self.iface.removeToolBarIcon(self.action)
 
     def update_ui(self):
@@ -383,33 +383,33 @@ class LTS:
 
         # Should really put these in a function
 
-        index = layer.fieldNameIndex("_lts")
+        index = layer.fieldNameIndex("qLts")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_num_lane")
+        index = layer.fieldNameIndex("qNum_lane")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_num_lane", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qNum_lane", \
                 QVariant.Int) ] )
             layer.updateFields()
 
-        index = layer.fieldNameIndex("_protected")
+        index = layer.fieldNameIndex("qProtected")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_protected", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qProtected", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_bike_lane")
+        index = layer.fieldNameIndex("qBike_lane")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_bike_lane", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qBike_lane", \
                 QVariant.Int) ] )
             layer.updateFields()
         index = layer.fieldNameIndex("CROSSINGME")
@@ -419,32 +419,32 @@ class LTS:
               res = layer.dataProvider().addAttributes( [ QgsField("CROSSINGME", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts11")
+        index = layer.fieldNameIndex("qLts11")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts11", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts11", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts12")
+        index = layer.fieldNameIndex("qLts12")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts12", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts12", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts13")
+        index = layer.fieldNameIndex("qLts13")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts13", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts13", \
                 QVariant.Int) ] )
             layer.updateFields()
-        index = layer.fieldNameIndex("_lts_woX")
+        index = layer.fieldNameIndex("qLts_woX")
         if index == -1: # field doesn't exist
             caps = layer.dataProvider().capabilities()
             if caps & QgsVectorDataProvider.AddAttributes:
-              res = layer.dataProvider().addAttributes( [ QgsField("_lts_woX", \
+              res = layer.dataProvider().addAttributes( [ QgsField("qLts_woX", \
                 QVariant.Int) ] )
             layer.updateFields()
         index = layer.fieldNameIndex("LTS")
@@ -485,14 +485,14 @@ class LTS:
                 i+=1
                 j=ceil(i/(nFeat/100))
                 self.dlg.ui.progress_bar.setValue(j)
-            feature["_lts_woX"] = street.LTS
-            feature["_lts"] = street.LTS
-            feature["_lts11"] = street.lts11
-            feature["_lts12"] = street.lts12
-            feature["_lts13"] = street.lts13
-            feature["_num_lane"] = street.num_lane
-            feature["_bike_lane"] = street.bike_lane
-            feature["_protected"] = street.protected
+            feature["qLts_woX"] = street.LTS
+            feature["qLts"] = street.LTS
+            feature["qLts11"] = street.lts11
+            feature["qLts12"] = street.lts12
+            feature["qLts13"] = street.lts13
+            feature["qNum_lane"] = street.num_lane
+            feature["qBike_lane"] = street.bike_lane
+            feature["qProtected"] = street.protected
             feature["CROSSINGME"] = street.crossing_me
             layer.updateFeature(feature)
         # layer.updateFields()
@@ -524,10 +524,10 @@ class LTS:
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","w")as file:
         #     file.write(lts_column +"\n")
             
-        lts1_existed = self.make_column(layer,"_isl_lts1")
-        lts2_existed = self.make_column(layer,"_isl_lts2")
-        lts3_existed = self.make_column(layer,"_isl_lts3")
-        lts4_existed = self.make_column(layer,"_isl_lts4")
+        lts1_existed = self.make_column(layer,"qIsl_lts1")
+        lts2_existed = self.make_column(layer,"qIsl_lts2")
+        lts3_existed = self.make_column(layer,"qIsl_lts3")
+        lts4_existed = self.make_column(layer,"qIsl_lts4")
         # path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter/for_test.shp"
         # out_path = "C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter"
         # get the path from selected layer
@@ -543,7 +543,7 @@ class LTS:
         self.dlg.ui.progressBar.setValue(5)
         G=layer2.to_undirected()
         self.dlg.ui.progressBar.setValue(10)
-        lts_threshs = [(1,"_isl_lts1"),(2,"_isl_lts2"),(3,"_isl_lts3"),(4,"_isl_lts4")]
+        lts_threshs = [(1,"qIsl_lts1"),(2,"qIsl_lts2"),(3,"qIsl_lts3"),(4,"qIsl_lts4")]
         field = str(lts_column)
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Plugin\LTS\log.txt","a")as file:
         #     file.write(field +"\n")
@@ -568,10 +568,10 @@ class LTS:
             G[edge[0]][edge[1]] = edge[2] 
 
 
-        self.remove_column(layer,"_isl_lts1",lts1_existed)
-        self.remove_column(layer,"_isl_lts2",lts2_existed)
-        self.remove_column(layer,"_isl_lts3",lts3_existed)
-        self.remove_column(layer,"_isl_lts4",lts4_existed)
+        self.remove_column(layer,"qIsl_lts1",lts1_existed)
+        self.remove_column(layer,"qIsl_lts2",lts2_existed)
+        self.remove_column(layer,"qIsl_lts3",lts3_existed)
+        self.remove_column(layer,"qIsl_lts4",lts4_existed)
 
 
         out_name =str(layer_name+"_with islands")
@@ -618,10 +618,10 @@ class LTS:
         for feature in layer.getFeatures():
             numberOfLane = feature['NUMLANE']
             lts = feature ['_lts12']
-            islLTS_1 = feature['_isl_lts1']
-            islLTS_2 = feature['_isl_lts2'] 
-            islLTS_3 = feature['_isl_lts3'] 
-            islLTS_4 = feature['_isl_lts4'] 
+            islLTS_1 = feature['qIsl_lts1']
+            islLTS_2 = feature['qIsl_lts2'] 
+            islLTS_3 = feature['qIsl_lts3'] 
+            islLTS_4 = feature['qIsl_lts4'] 
             if lts ==1 : assert islLTS_1 > 0
             elif lts ==2 :
                 assert islLTS_1 == 0
