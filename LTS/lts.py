@@ -42,6 +42,7 @@ import random
 import time 
 import csv
 import cPickle as pickle
+
 ############## read or write shapefiles
 """
 *********
@@ -273,6 +274,26 @@ def setup_module(module):
         raise SkipTest("OGR not available")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ###########################################################
 ###########################################################
 class LTS:
@@ -303,7 +324,7 @@ class LTS:
     def initGui(self):
         # Create action that will start plugin configuration
         self.action = QAction(
-            QIcon(":/plugins/lts/icon.png"),
+            QIcon(":/plugins/LTS/icon.png"),
             u"LTS Toolbox", self.iface.mainWindow())
         # connect the action to the run method
         self.action.triggered.connect(self.run)
@@ -317,6 +338,8 @@ class LTS:
         QtCore.QObject.connect(self.dlg.ui.process_Button,QtCore.SIGNAL("clicked()"), self.process)
         # QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("currentIndexChanged(int)"), self.update_lts_field)
         QtCore.QObject.connect(self.dlg.ui.layerCombo,QtCore.SIGNAL("activated (int)"), self.update_lts_field)
+        QtCore.QObject.connect(self.dlg.ui.road_combo, QtCore.SIGNAL("activated (int)"), self.update_conn_lts_field)
+
         QtCore.QObject.connect(self.dlg.ui.find_cc_Button,QtCore.SIGNAL("clicked()"), self.find_connected_components)
         QtCore.QObject.connect(self.dlg.ui.find_connectivity_btn,QtCore.SIGNAL("clicked()"), self.compute_connectivity)
 
@@ -325,8 +348,8 @@ class LTS:
         self.update_ui()
         self.layers = self.iface.legendInterface().layers()  # store the layer list 
         # self.dlg.ui.layerCombo.clear()  # clear the combo 
-        for layer in self.layers:    # foreach layer in legend 
-            self.dlg.ui.layerCombo.addItem( layer.name() )    # add it to the combo 
+        # for layer in self.layers:    # foreach layer in legend 
+        #     self.dlg.ui.layerCombo.addItem( layer.name() )    # add it to the combo 
 
     def unload(self):
         # Remove the plugin menu item and icon
@@ -368,6 +391,21 @@ class LTS:
             for attr in layer.dataProvider().fieldNameMap().keys(): # dict with column names as keys
                 # if layer.type() == QgsMapLayer.VectorLayer and layer.geometryType() == QGis.Line:
                 self.dlg.ui.lts_combo.addItem(str(attr), attr) 
+        except:
+            pass
+
+    def update_conn_lts_field(self):
+        index = self.dlg.ui.road_combo.currentIndex() 
+        if index < 0: 
+            # it may occur if there's no layer in the combo/legend 
+            pass
+        else: 
+            layer = self.dlg.ui.road_combo.itemData(index) 
+        try:
+            self.dlg.ui.LtsColumn.clear()
+            for attr in layer.dataProvider().fieldNameMap().keys(): # dict with column names as keys
+                # if layer.type() == QgsMapLayer.VectorLayer and layer.geometryType() == QGis.Line:
+                self.dlg.ui.LtsColumn.addItem(str(attr), attr) 
         except:
             pass
 
@@ -623,8 +661,16 @@ class LTS:
         Should get lts_column from a combobox
         Networkx doesn't return a length if there is no path between the two points; it simply ignores it
         '''
+        self.dlg.ui.progress_text.setText("Start")
 
-        lts_column = "qLts12"
+        index = self.dlg.ui.LtsColumn.currentIndex() 
+        if index < 0: 
+            # it may occur if there's no layer in the combo/legend 
+            pass
+        else: 
+            lts_column = self.dlg.ui.LtsColumn.itemData(index)
+        
+        self.dlg.ui.progress_text.append(str(type(lts_column)))
 
         index = self.dlg.ui.road_combo.currentIndex() 
         if index < 0:  
@@ -638,14 +684,14 @@ class LTS:
         else: 
             tz_layer = self.dlg.ui.taz_combo.itemData(index) 
 
-        myfilepath= os.path.dirname( unicode( rd_layer.dataProvider().dataSourceUri() ) ) ;
+        myfilepath= os.path.dirname( ( rd_layer.dataProvider().dataSourceUri() ) ) ;
         layer_name = rd_layer.name()
         path = myfilepath +"/"+layer_name+".shp"
         # Get street network
         road_layer = nx.read_shp(str(path))
         
         # Get TAZ layer
-        myfilepath= os.path.dirname( unicode( tz_layer.dataProvider().dataSourceUri() ) ) ;
+        myfilepath= os.path.dirname( ( tz_layer.dataProvider().dataSourceUri() ) ) ;
         layer_name = tz_layer.name()
         path = myfilepath +"/"+layer_name+".shp" # or instead of all this: layer.source()
         # taz_layer = nx.read_shp(path)
@@ -671,28 +717,48 @@ class LTS:
             disconnected_emp.setdefault(i,0.0)
 
         time_1 = time.time()
-        self.dlg.ui.progress_text.setText("done Initiaizations")
+        self.dlg.ui.progress_text.append("done Initiaizations")
         # print "done Initiaizations",time_1 - start
         ####################################################################################
 
-        c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points') # get intersection points
-        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points.shp", "points", "ogr")
+        # c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points') # get intersection points
+        destination_file = str(myfilepath) + '/points.shp'
+        c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer, destination_file) # get intersection points
+        
+        # self.dlg.ui.progress_text.append(destination_file)
 
-        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"taz2010_PO",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points1')
-        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points1.shp", "points1", "ogr")
+        vlayer = QgsVectorLayer(destination_file, "points", "ogr")
 
+        destination_file = str(myfilepath) + '/points1.shp'
         c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"taz2010_EM",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points2')
-        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points2.shp", "points2", "ogr")
+            qgis_taz_layer,"taz2010_PO",destination_file)
+        vlayer = QgsVectorLayer(destination_file, "points1", "ogr")
 
+        # self.dlg.ui.progress_text.append(destination_file)
+
+        destination_file = str(myfilepath) + '/points2.shp'
         c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
-            qgis_taz_layer,"TAZ_ID",'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points3')
-        vlayer = QgsVectorLayer("C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points3.shp", "points3", "ogr")
+            qgis_taz_layer,"taz2010_EM",destination_file)
+        vlayer = QgsVectorLayer(destination_file, "points2", "ogr")
+
+        # self.dlg.ui.progress_text.append(destination_file)
+
+        destination_file = str(myfilepath) + '/points3.shp'
+        c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
+            qgis_taz_layer,"TAZ_ID",destination_file)
+        vlayer = QgsVectorLayer(destination_file, "points3", "ogr")
+
+        # self.dlg.ui.progress_text.append(destination_file)
+
         # REMOVE DUPLICATES
-        c=processing.runalg("saga:removeduplicatepoints",vlayer,"ID_SHAPE",0,0,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points4')
+        destination_file = str(str(myfilepath) + '/points44.shp')
+        c=processing.runalg("saga:removeduplicatepoints",vlayer,"ID_SHAPE",0,0,destination_file)
+        # self.dlg.ui.progress_text.append(destination_file)
+        vlayer = QgsVectorLayer(destination_file, "points44", "ogr")
 
-        node_layer = nx.read_shp("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\points4.shp")
+
+
+        node_layer = nx.read_shp(destination_file)
         ### make a graph out of nodes and street layer
         # Node graph with attributes
         node_graph = node_layer.to_undirected()
@@ -721,12 +787,12 @@ class LTS:
         # self.dlg.ui.progress_text.append(str(len(taz_dic)))
 
         selected_nodes = []
-        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\taz_dic.txt","w") as file:
-            pickle.dump(taz_dic,file)
-        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\street_graph.txt","w") as file:
-            pickle.dump(street_graph,file)
-        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\node_graph.txt","w") as file:
-            pickle.dump(node_graph,file)
+        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\taz_dic.txt","w") as file:
+        #     pickle.dump(taz_dic,file)
+        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\street_graph.txt","w") as file:
+        #     pickle.dump(street_graph,file)
+        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\node_graph.txt","w") as file:
+        #     pickle.dump(node_graph,file)
 
 
 
@@ -743,13 +809,13 @@ class LTS:
 
 
         time_3 = time.time()
-        self.dlg.ui.progress_text.append("length of selected_nodes")
-        self.dlg.ui.progress_text.append(str(len(selected_nodes)))
+        # self.dlg.ui.progress_text.append("length of selected_nodes")
+        # self.dlg.ui.progress_text.append(str(len(selected_nodes)))
 
         self.dlg.ui.progress_text.append("done subset")
 
-        with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
-            pickle.dump(selected_nodes,file)
+        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
+        #     pickle.dump(selected_nodes,file)
         #####
         # some analysis of average network connectivity
         # node_info1 = {}; node_info2 = {}; node_info3 = {}; node_info4 = {}; 
@@ -773,7 +839,7 @@ class LTS:
             graph_names[index] = nx.Graph(temp)
             
         time_4 = time.time()
-        self.dlg.ui.progress_text.append("done graphmaking")
+        self.dlg.ui.progress_text.append("done making graphs")
 
         counter = 0
         
@@ -1005,6 +1071,17 @@ class LTS:
                 writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
 
 
+        # delete new files
+        for i in ["/point.shp","/points1.shp","/points2.shp","/points3.shp","/points4.shp",
+            "/point.shx","/points1.shx","/points2.shx","/points3.shx","/points4.shx",
+            "/point.dbf","/points1.dbf","/points2.dbf","/points3.dbf","/points4.dbf",
+            "/point.prj","/points1.prj","/points2.prj","/points3.prj","/points4.prj"]:
+            try:
+                target = str( myfilepath + i)
+                os.remove(target)
+            except:
+                pass
+
 ##########################
 
 
@@ -1012,13 +1089,14 @@ class LTS:
     def run(self):
         # show the dialog
         self.dlg.show()
-        self.dlg.ui.progress_bar.setValue(0)
+        self.dlg.ui.progress_text.clear()
         self.dlg.ui.progressBar.setValue(0)
+        self.dlg.ui.progress_bar.setValue(0)
         self.dlg.ui.layerCombo.clear()
         self.dlg.ui.lts_combo.clear()
         self.dlg.ui.road_combo.clear()
         self.dlg.ui.taz_combo.clear()
-
+        self.dlg.ui.LtsColumn.clear()
 
         layers = QgsMapLayerRegistry.instance().mapLayers().values()
         for layer in layers:
@@ -1033,6 +1111,7 @@ class LTS:
 
 
         self.update_lts_field()
+        self.update_conn_lts_field()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed

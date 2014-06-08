@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_lts.ui'
 #
-# Created: Wed May 21 18:11:32 2014
+# Created: Sat Jun 07 18:50:43 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(673, 547)
+        Dialog.resize(673, 591)
         self.label = QtGui.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(20, 10, 131, 16))
         self.label.setObjectName(_fromUtf8("label"))
@@ -54,32 +54,32 @@ class Ui_Dialog(object):
         self.progressBar.setProperty("value", 24)
         self.progressBar.setObjectName(_fromUtf8("progressBar"))
         self.groupBox = QtGui.QGroupBox(Dialog)
-        self.groupBox.setGeometry(QtCore.QRect(70, 230, 531, 301))
+        self.groupBox.setGeometry(QtCore.QRect(40, 230, 591, 341))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.label_3 = QtGui.QLabel(self.groupBox)
-        self.label_3.setGeometry(QtCore.QRect(70, 20, 101, 16))
+        self.label_3.setGeometry(QtCore.QRect(10, 30, 101, 16))
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.road_combo = QtGui.QComboBox(self.groupBox)
-        self.road_combo.setGeometry(QtCore.QRect(20, 40, 181, 22))
+        self.road_combo.setGeometry(QtCore.QRect(110, 30, 181, 22))
         self.road_combo.setObjectName(_fromUtf8("road_combo"))
         self.label_4 = QtGui.QLabel(self.groupBox)
-        self.label_4.setGeometry(QtCore.QRect(70, 70, 111, 16))
+        self.label_4.setGeometry(QtCore.QRect(10, 110, 111, 16))
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.taz_combo = QtGui.QComboBox(self.groupBox)
-        self.taz_combo.setGeometry(QtCore.QRect(20, 90, 181, 22))
+        self.taz_combo.setGeometry(QtCore.QRect(110, 110, 181, 22))
         self.taz_combo.setObjectName(_fromUtf8("taz_combo"))
         self.find_connectivity_btn = QtGui.QPushButton(self.groupBox)
-        self.find_connectivity_btn.setGeometry(QtCore.QRect(170, 150, 171, 23))
+        self.find_connectivity_btn.setGeometry(QtCore.QRect(200, 180, 171, 23))
         self.find_connectivity_btn.setObjectName(_fromUtf8("find_connectivity_btn"))
         self.progress_text = QtGui.QTextEdit(self.groupBox)
-        self.progress_text.setGeometry(QtCore.QRect(150, 200, 231, 71))
+        self.progress_text.setGeometry(QtCore.QRect(180, 230, 211, 71))
         self.progress_text.setReadOnly(True)
         self.progress_text.setObjectName(_fromUtf8("progress_text"))
         self.label_8 = QtGui.QLabel(self.groupBox)
-        self.label_8.setGeometry(QtCore.QRect(240, 180, 46, 13))
+        self.label_8.setGeometry(QtCore.QRect(270, 210, 46, 13))
         self.label_8.setObjectName(_fromUtf8("label_8"))
         self.groupBox_2 = QtGui.QGroupBox(self.groupBox)
-        self.groupBox_2.setGeometry(QtCore.QRect(260, 20, 261, 121))
+        self.groupBox_2.setGeometry(QtCore.QRect(310, 20, 261, 121))
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.label_5 = QtGui.QLabel(self.groupBox_2)
         self.label_5.setGeometry(QtCore.QRect(10, 30, 91, 16))
@@ -99,6 +99,12 @@ class Ui_Dialog(object):
         self.label_7 = QtGui.QLabel(self.groupBox_2)
         self.label_7.setGeometry(QtCore.QRect(10, 90, 101, 16))
         self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.label_9 = QtGui.QLabel(self.groupBox)
+        self.label_9.setGeometry(QtCore.QRect(10, 70, 91, 16))
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.LtsColumn = QtGui.QComboBox(self.groupBox)
+        self.LtsColumn.setGeometry(QtCore.QRect(110, 70, 131, 22))
+        self.LtsColumn.setObjectName(_fromUtf8("LtsColumn"))
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -118,4 +124,5 @@ class Ui_Dialog(object):
         self.label_5.setText(_translate("Dialog", "Minimum Distance", None))
         self.label_6.setText(_translate("Dialog", "Maximum Distance", None))
         self.label_7.setText(_translate("Dialog", "Detour Coefficient", None))
+        self.label_9.setText(_translate("Dialog", "Select LTS Column", None))
 
