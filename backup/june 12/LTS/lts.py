@@ -1069,9 +1069,7 @@ class LTS:
             writer.writerow(fieldnames)
             for i in range(1,5):
                 writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
-            writer.writerow(fieldnames)
-            for i in range(7,11):
-                writer.writerow((i,disconnected_pop[i] , disconnected_emp[i]))
+
 
         # delete new files
         for i in ["/point.shp","/points1.shp","/points2.shp","/points3.shp","/points4.shp",
