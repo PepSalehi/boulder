@@ -797,7 +797,7 @@ class LTS:
 
 
         for taz, list_of_nodes in taz_dic.iteritems():
-            number_of_points = min(1,len(list_of_nodes) )
+            number_of_points = min(5,len(list_of_nodes) )
             passed_nodes = 0
             for i in range( number_of_points*5 ): # check 5 times more points
                 if passed_nodes >= number_of_points: 
@@ -909,7 +909,7 @@ class LTS:
                     
                 
 
-            origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop # how long is it gonna take to find these nodes?
+            origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop/5 # how long is it gonna take to find these nodes?
             assert origin_pop >= 0, "negative Origin Population"
 
             if runLTS1:
@@ -918,14 +918,14 @@ class LTS:
                     if node != dest:
                         try :
                             distance = length_lts1[dest]
-                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                 
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                     # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                     # if distance >= minimum_distance :
                         
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -954,14 +954,14 @@ class LTS:
                     if node != dest:
                         try :
                             distance = length_lts2[dest]
-                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                 
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                     # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                     # if distance >= minimum_distance :
                         
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -989,14 +989,14 @@ class LTS:
                     if node != dest:
                         try :
                             distance = length_lts3[dest]
-                            if distance >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                 
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                     # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                     # if distance >= minimum_distance :
                         
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -1027,11 +1027,11 @@ class LTS:
                             if distance >= minimum_distance :
 
                 
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                     # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                     # if distance >= minimum_distance :
                         
                         # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
