@@ -953,11 +953,11 @@ class LTS:
                                 if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                     
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                         # temp += origin_pop * dest_pop
                                     assert dest_pop >= 0, "negative Population"
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                         # if distance >= minimum_distance :
                             
                             # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -989,11 +989,11 @@ class LTS:
                                 if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                     
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                         # temp += origin_pop * dest_pop
                                     assert dest_pop >= 0, "negative Population"
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                         # if distance >= minimum_distance :
                             
                             # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -1024,11 +1024,11 @@ class LTS:
                                 if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
                     
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                         # temp += origin_pop * dest_pop
                                     assert dest_pop >= 0, "negative Population"
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                         # if distance >= minimum_distance :
                             
                             # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
@@ -1059,11 +1059,11 @@ class LTS:
                             # if distance >= minimum_distance :
 
                 
-                            dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                            dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
                 # temp += origin_pop * dest_pop
                             assert dest_pop >= 0, "negative Population"
 
-                            dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                            dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
                 # if distance >= minimum_distance :
                     
                     # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
