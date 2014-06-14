@@ -941,149 +941,164 @@ class LTS:
                         
                     
 
-                origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop/5 # how long is it gonna take to find these nodes?
+                origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop/num_of_nodes # how long is it gonna take to find these nodes?
                 assert origin_pop >= 0, "negative Origin Population"
 
                 if runLTS1:
                     # try:
-                    for dest in selected_nodes:
-                        if node != dest:
-                            try :
-                                distance = length_lts1[dest]
-                                if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                    for taz2, ll2  in selected_nodes.iteritems():
+                        list_of_nodes2 = ll2[0]
+                        num_of_nodes2 = ll2[1]
 
-                    
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
-                        # temp += origin_pop * dest_pop
-                                    assert dest_pop >= 0, "negative Population"
+                        for dest in list_of_nodes2:
+                            if node != dest:
+                                try :
+                                    distance = length_lts1[dest]
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
-                        # if distance >= minimum_distance :
-                            
-                            # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                            # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
-                            # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
-                                    if dest_emp < 0: dest_emp =0
-                                    assert dest_emp >= 0, "negative employment"
-
-                            # tempDEL.append(origin_pop * dest_pop)
-                            # destDEL.append(dest_pop)
-                            # orgDEL.append(origin_pop)
-
-                            # file.write(str(origin_pop * dest_pop))
-                                    population_connectivity[1] += origin_pop * dest_pop
-                                    employment_connectivity[1] += origin_pop * dest_emp
-                                else: 
-                                    disconnected_pop[1] += origin_pop * dest_pop
-                                    disconnected_emp[1] += origin_pop * dest_emp
-                            except Exception,e :
-                                pass 
                         
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[1] += origin_pop * dest_pop
+                                        employment_connectivity[1] += origin_pop * dest_emp
+                                    else: 
+                                        disconnected_pop[1] += origin_pop * dest_pop
+                                        disconnected_emp[1] += origin_pop * dest_emp
+                                except Exception,e :
+                                    pass 
+                    
 
                 if runLTS2:
                     # try:
-                    for dest in selected_nodes:
-                        if node != dest:
-                            try :
-                                distance = length_lts2[dest]
-                                if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                    for taz2, ll2  in selected_nodes.iteritems():
+                        list_of_nodes2 = ll2[0]
+                        num_of_nodes2 = ll2[1]
 
-                    
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
-                        # temp += origin_pop * dest_pop
-                                    assert dest_pop >= 0, "negative Population"
+                        for dest in list_of_nodes2:
+                            if node != dest:
+                                try :
+                                    distance = length_lts2[dest]
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
-                        # if distance >= minimum_distance :
-                            
-                            # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                            # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
-                            # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
-                                    if dest_emp < 0: dest_emp =0
-                                    assert dest_emp >= 0, "negative employment"
-
-                            # tempDEL.append(origin_pop * dest_pop)
-                            # destDEL.append(dest_pop)
-                            # orgDEL.append(origin_pop)
-
-                            # file.write(str(origin_pop * dest_pop))
-                                    population_connectivity[2] += origin_pop * dest_pop
-                                    employment_connectivity[2] += origin_pop * dest_emp
-                                else: 
-                                    disconnected_pop[2] += origin_pop * dest_pop
-                                    disconnected_emp[2] += origin_pop * dest_emp
-                            except Exception,e :
-                                pass 
                         
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[2] += origin_pop * dest_pop
+                                        employment_connectivity[2] += origin_pop * dest_emp
+                                    else: 
+                                        disconnected_pop[2] += origin_pop * dest_pop
+                                        disconnected_emp[2] += origin_pop * dest_emp
+                                except Exception,e :
+                                    pass 
+                    
                 if runLTS3:
                     # try:
-                    for dest in selected_nodes:
-                        if node != dest:
-                            try :
-                                distance = length_lts3[dest]
-                                if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+                    for taz2, ll2  in selected_nodes.iteritems():
+                        list_of_nodes2 = ll2[0]
+                        num_of_nodes2 = ll2[1]
 
-                    
-                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
-                        # temp += origin_pop * dest_pop
-                                    assert dest_pop >= 0, "negative Population"
+                        for dest in list_of_nodes2:
+                            if node != dest:
+                                try :
+                                    distance = length_lts3[dest]
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
-                        # if distance >= minimum_distance :
-                            
-                            # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                            # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
-                            # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
-                                    if dest_emp < 0: dest_emp =0
-                                    assert dest_emp >= 0, "negative employment"
-
-                            # tempDEL.append(origin_pop * dest_pop)
-                            # destDEL.append(dest_pop)
-                            # orgDEL.append(origin_pop)
-
-                            # file.write(str(origin_pop * dest_pop))
-                                    population_connectivity[3] += origin_pop * dest_pop
-                                    employment_connectivity[3] += origin_pop * dest_emp
-                                else: 
-                                    disconnected_pop[3] += origin_pop * dest_pop
-                                    disconnected_emp[3] += origin_pop * dest_emp
-                            except Exception,e :
-                                pass 
                         
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[3] += origin_pop * dest_pop
+                                        employment_connectivity[3] += origin_pop * dest_emp
+                                    else: 
+                                        disconnected_pop[3] += origin_pop * dest_pop
+                                        disconnected_emp[3] += origin_pop * dest_emp
+                                except Exception,e :
+                                    pass 
+                    
                 if runLTS4:
                     # try:
-                    for dest in selected_nodes:
-                        # if node != dest:
-                        try :
-                            distance = length_lts4[dest]
-                            # if distance >= minimum_distance :
+                    for taz2, ll2  in selected_nodes.iteritems():
+                        list_of_nodes2 = ll2[0]
+                        num_of_nodes2 = ll2[1]
+                    # if node != dest:
+                        for dest in list_of_nodes2:
 
-                
-                            dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
-                # temp += origin_pop * dest_pop
-                            assert dest_pop >= 0, "negative Population"
+                            try :
+                                distance = length_lts4[dest]
+                                # if distance >= minimum_distance :
+       
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
 
-                            dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
-                # if distance >= minimum_distance :
-                    
-                    # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                    # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
-                    # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
-                            if dest_emp < 0: dest_emp =0
-                            assert dest_emp >= 0, "negative employment"
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
 
-                    # tempDEL.append(origin_pop * dest_pop)
-                    # destDEL.append(dest_pop)
-                    # orgDEL.append(origin_pop)
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
 
-                    # file.write(str(origin_pop * dest_pop))
-                            population_connectivity[4] += origin_pop * dest_pop
-                            employment_connectivity[4] += origin_pop * dest_emp
-                            # else: 
-                            #     disconnected_pop[4] += origin_pop * dest_pop
-                            #     disconnected_emp[4] += origin_pop * dest_emp
-                        except Exception,e :
-                            pass 
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[4] += origin_pop * dest_pop
+                                employment_connectivity[4] += origin_pop * dest_emp
+                                # else: 
+                                #     disconnected_pop[4] += origin_pop * dest_pop
+                                #     disconnected_emp[4] += origin_pop * dest_emp
+                            except Exception,e :
+                                pass 
 
 
 
