@@ -1097,8 +1097,8 @@ class LTS:
                                     # else: 
                                     #     disconnected_pop[4] += origin_pop * dest_pop
                                     #     disconnected_emp[4] += origin_pop * dest_emp
-                                except Exception,e :
-                                    pass 
+                            except Exception,e :
+                                pass 
 
 
 
