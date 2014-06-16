@@ -1072,33 +1072,33 @@ class LTS:
 
                             try :
                                 distance = length_lts4[dest]
-                                # if distance >= minimum_distance :
+                                if distance >= minimum_distance :
        
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
-                    # temp += origin_pop * dest_pop
-                                assert dest_pop >= 0, "negative Population"
+                                    dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes
+                        # temp += origin_pop * dest_pop
+                                    assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
-                    # if distance >= minimum_distance :
-                        
-                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
-                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
-                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
+                                    dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes
+                        # if distance >= minimum_distance :
+                            
+                            # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                            # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                            # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                    if dest_emp < 0: dest_emp =0
+                                    assert dest_emp >= 0, "negative employment"
 
-                        # tempDEL.append(origin_pop * dest_pop)
-                        # destDEL.append(dest_pop)
-                        # orgDEL.append(origin_pop)
+                            # tempDEL.append(origin_pop * dest_pop)
+                            # destDEL.append(dest_pop)
+                            # orgDEL.append(origin_pop)
 
-                        # file.write(str(origin_pop * dest_pop))
-                                population_connectivity[4] += origin_pop * dest_pop
-                                employment_connectivity[4] += origin_pop * dest_emp
-                                # else: 
-                                #     disconnected_pop[4] += origin_pop * dest_pop
-                                #     disconnected_emp[4] += origin_pop * dest_emp
-                            except Exception,e :
-                                pass 
+                            # file.write(str(origin_pop * dest_pop))
+                                    population_connectivity[4] += origin_pop * dest_pop
+                                    employment_connectivity[4] += origin_pop * dest_emp
+                                    # else: 
+                                    #     disconnected_pop[4] += origin_pop * dest_pop
+                                    #     disconnected_emp[4] += origin_pop * dest_emp
+                                except Exception,e :
+                                    pass 
 
 
 
@@ -1109,7 +1109,8 @@ class LTS:
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
-        writefile = myfilepath+'/result.csv'
+        from time import ctime 
+        writefile = myfilepath+'/result'+ ctime()+'.csv'
         fieldnames = ['LTS level','population_connectivity', 'employment_connectivity']
         fieldnames2 = ['LTS level','population_disqualified', 'employment_disqualified']
 
@@ -1122,6 +1123,14 @@ class LTS:
             for i in range(7,10):
                 writer.writerow((i,disconnected_pop[i-6] , disconnected_emp[i-6]))
 
+
+        try :
+            del street_graph
+            del node_graph
+            del node_layer
+            del destination_file
+        except:
+            pass 
         # delete new files
         for i in ["\\points.shp","\\points1.shp","\\points2.shp","\\points3.shp","\\points4.shp",
             "\\points.shx","\\points1.shx","\\points2.shx","\\points3.shx","\\points4.shx",
