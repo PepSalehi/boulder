@@ -670,7 +670,7 @@ class LTS:
         else: 
             lts_column = self.dlg.ui.LtsColumn.itemData(index)
         
-        self.dlg.ui.progress_text.append(str(type(lts_column)))
+        
 
         index = self.dlg.ui.road_combo.currentIndex() 
         if index < 0:  
@@ -1110,7 +1110,9 @@ class LTS:
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
         from time import ctime 
-        writefile = myfilepath+'/result'+ ctime()+'.csv'
+        a = ctime()
+        c = " ".join((a.strip()).split()).replace(":","_")
+        writefile = myfilepath+'\\results'+ c+'.csv'
         fieldnames = ['LTS level','population_connectivity', 'employment_connectivity']
         fieldnames2 = ['LTS level','population_disqualified', 'employment_disqualified']
 
