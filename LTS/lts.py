@@ -1143,8 +1143,9 @@ class LTS:
                 os.remove(target)
             except:
                 pass
+
         try:
-            os.remove( str( myfilepath + "\\points.shp")
+            os.remove( str( myfilepath + "\\points.shp"))
         except:
             pass 
 
