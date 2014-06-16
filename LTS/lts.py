@@ -1109,10 +1109,10 @@ class LTS:
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
-        from time import ctime 
-        a = ctime()
-        c = " ".join((a.strip()).split()).replace(":","_")
-        writefile = myfilepath+'\\results'+ c+'.csv'
+        import time 
+        a = time.strftime("%H:%M:%S")
+        c = a.replace(":","_")
+        writefile = myfilepath+'\\results '+ c+'.csv'
         fieldnames = ['LTS level','population_connectivity', 'employment_connectivity']
         fieldnames2 = ['LTS level','population_disqualified', 'employment_disqualified']
 
@@ -1122,7 +1122,7 @@ class LTS:
             for i in range(1,5):
                 writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
             writer.writerow(fieldnames2)
-            for i in range(7,10):
+            for i in range(7,11):
                 writer.writerow((i,disconnected_pop[i-6] , disconnected_emp[i-6]))
 
 
@@ -1143,7 +1143,10 @@ class LTS:
                 os.remove(target)
             except:
                 pass
-        
+        try:
+            os.remove( str( myfilepath + "\\points.shp")
+        except:
+            pass 
 
 
 ##########################
