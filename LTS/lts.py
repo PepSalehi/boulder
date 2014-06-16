@@ -1094,9 +1094,9 @@ class LTS:
                             # file.write(str(origin_pop * dest_pop))
                                     population_connectivity[4] += origin_pop * dest_pop
                                     employment_connectivity[4] += origin_pop * dest_emp
-                                    # else: 
-                                    #     disconnected_pop[4] += origin_pop * dest_pop
-                                    #     disconnected_emp[4] += origin_pop * dest_emp
+                                else: 
+                                    disconnected_pop[4] += origin_pop * dest_pop
+                                    disconnected_emp[4] += origin_pop * dest_emp
                             except Exception,e :
                                 pass 
 
