@@ -40,13 +40,10 @@ class LTSDialog(QtGui.QDialog, Ui_Dialog):
         self.ui.setupUi(self)
         self.ui.progress_bar.setValue(0)
         self.ui.progressBar.setValue(0)
-        self.ui.ConnProgressBar.setValue(0)
-        
         self.setWindowTitle(("LTS Toolbox"))
         self.ui.minDist.setText("2500")
         self.ui.maxDist.setText("10000000")
         self.ui.Detour_coeff.setText("1.33")
-        self.ui.numberSamplePoints.setText("5")
 
 
 

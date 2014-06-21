@@ -1,0 +1,2 @@
+_lts
+C:/Users/Peyman.n/Dropbox/Boulder/BoulderStreetsRating_20140407_Peter/BoulderStreetsWProjection_20140407_Joined.shp

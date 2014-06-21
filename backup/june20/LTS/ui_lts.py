@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_lts.ui'
 #
-# Created: Fri Jun 20 18:28:33 2014
+# Created: Sat Jun 07 18:50:43 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,8 +71,15 @@ class Ui_Dialog(object):
         self.find_connectivity_btn = QtGui.QPushButton(self.groupBox)
         self.find_connectivity_btn.setGeometry(QtCore.QRect(200, 180, 171, 23))
         self.find_connectivity_btn.setObjectName(_fromUtf8("find_connectivity_btn"))
+        self.progress_text = QtGui.QTextEdit(self.groupBox)
+        self.progress_text.setGeometry(QtCore.QRect(180, 230, 211, 71))
+        self.progress_text.setReadOnly(True)
+        self.progress_text.setObjectName(_fromUtf8("progress_text"))
+        self.label_8 = QtGui.QLabel(self.groupBox)
+        self.label_8.setGeometry(QtCore.QRect(270, 210, 46, 13))
+        self.label_8.setObjectName(_fromUtf8("label_8"))
         self.groupBox_2 = QtGui.QGroupBox(self.groupBox)
-        self.groupBox_2.setGeometry(QtCore.QRect(310, 20, 261, 151))
+        self.groupBox_2.setGeometry(QtCore.QRect(310, 20, 261, 121))
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.label_5 = QtGui.QLabel(self.groupBox_2)
         self.label_5.setGeometry(QtCore.QRect(10, 30, 91, 16))
@@ -92,25 +99,12 @@ class Ui_Dialog(object):
         self.label_7 = QtGui.QLabel(self.groupBox_2)
         self.label_7.setGeometry(QtCore.QRect(10, 90, 101, 16))
         self.label_7.setObjectName(_fromUtf8("label_7"))
-        self.label_10 = QtGui.QLabel(self.groupBox_2)
-        self.label_10.setGeometry(QtCore.QRect(10, 120, 111, 16))
-        self.label_10.setObjectName(_fromUtf8("label_10"))
-        self.numberSamplePoints = QtGui.QLineEdit(self.groupBox_2)
-        self.numberSamplePoints.setGeometry(QtCore.QRect(130, 120, 113, 20))
-        self.numberSamplePoints.setObjectName(_fromUtf8("numberSamplePoints"))
         self.label_9 = QtGui.QLabel(self.groupBox)
         self.label_9.setGeometry(QtCore.QRect(10, 70, 91, 16))
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.LtsColumn = QtGui.QComboBox(self.groupBox)
         self.LtsColumn.setGeometry(QtCore.QRect(110, 70, 131, 22))
         self.LtsColumn.setObjectName(_fromUtf8("LtsColumn"))
-        self.ConnProgressBar = QtGui.QProgressBar(self.groupBox)
-        self.ConnProgressBar.setGeometry(QtCore.QRect(70, 220, 451, 23))
-        self.ConnProgressBar.setProperty("value", 50)
-        self.ConnProgressBar.setTextVisible(True)
-        self.ConnProgressBar.setOrientation(QtCore.Qt.Horizontal)
-        self.ConnProgressBar.setInvertedAppearance(False)
-        self.ConnProgressBar.setObjectName(_fromUtf8("ConnProgressBar"))
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -125,10 +119,10 @@ class Ui_Dialog(object):
         self.label_3.setText(_translate("Dialog", "Select Road Layer ", None))
         self.label_4.setText(_translate("Dialog", "Select TAZ Layer", None))
         self.find_connectivity_btn.setText(_translate("Dialog", "Compute Connectivity Measure", None))
+        self.label_8.setText(_translate("Dialog", "Progress", None))
         self.groupBox_2.setTitle(_translate("Dialog", "Settings", None))
         self.label_5.setText(_translate("Dialog", "Minimum Distance", None))
         self.label_6.setText(_translate("Dialog", "Maximum Distance", None))
         self.label_7.setText(_translate("Dialog", "Detour Coefficient", None))
-        self.label_10.setText(_translate("Dialog", "Sample Points per TAZ", None))
         self.label_9.setText(_translate("Dialog", "Select LTS Column", None))
 

@@ -182,13 +182,39 @@
      <string>Compute Connectivity Measure</string>
     </property>
    </widget>
+   <widget class="QTextEdit" name="progress_text">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>230</y>
+      <width>211</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>210</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Progress</string>
+    </property>
+   </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
       <x>310</x>
       <y>20</y>
       <width>261</width>
-      <height>151</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -263,29 +289,6 @@
       <string>Detour Coefficient</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_10">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>111</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Sample Points per TAZ</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="numberSamplePoints">
-     <property name="geometry">
-      <rect>
-       <x>130</x>
-       <y>120</y>
-       <width>113</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
    </widget>
    <widget class="QLabel" name="label_9">
     <property name="geometry">
@@ -310,37 +313,16 @@
      </rect>
     </property>
    </widget>
-   <widget class="QProgressBar" name="ConnProgressBar">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>220</y>
-      <width>451</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="value">
-     <number>50</number>
-    </property>
-    <property name="textVisible">
-     <bool>true</bool>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="invertedAppearance">
-     <bool>false</bool>
-    </property>
-   </widget>
    <zorder>groupBox_2</zorder>
    <zorder>label_3</zorder>
    <zorder>road_combo</zorder>
    <zorder>label_4</zorder>
    <zorder>taz_combo</zorder>
    <zorder>find_connectivity_btn</zorder>
+   <zorder>progress_text</zorder>
+   <zorder>label_8</zorder>
    <zorder>label_9</zorder>
    <zorder>LtsColumn</zorder>
-   <zorder>ConnProgressBar</zorder>
   </widget>
  </widget>
  <resources/>

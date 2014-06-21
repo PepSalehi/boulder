@@ -730,9 +730,8 @@ class LTS:
         Should get lts_column from a combobox
         Networkx doesn't return a length if there is no path between the two points; it simply ignores it
         '''
-        self.dlg.ui.ConnProgressBar.setValue(2)
 
-        
+        self.dlg.ui.progress_text.setText("Start")
 
         index = self.dlg.ui.LtsColumn.currentIndex() 
         if index < 0: 
@@ -775,20 +774,9 @@ class LTS:
             if g['taz2010_Em'] >= 0:
                 total_emp += g['taz2010_Em']
 
-        self.dlg.ui.ConnProgressBar.setValue(5)
-
         maximum_distance = int(self.dlg.ui.maxDist.text())       # 1000 #in ft
         minimum_distance = int(self.dlg.ui.minDist.text())       # 15 # in ft
         detour_coeff = float(self.dlg.ui.Detour_coeff.text())      # 1.33 # if lts2.length <= 1.33 lts4.length : connected Detour_coeff
-        number_tobe_sampled = int(self.dlg.ui.numberSamplePoints.text())
-
-        not_connected = {}
-        connected_w_detour = {} 
-        connected = {}
-        emp_not_connected = {}
-        emp_connected_w_detour = {} 
-        emp_connected = {}
-
 
         disconnected_pop = {}
         disconnected_emp = {}
@@ -800,15 +788,8 @@ class LTS:
             disconnected_pop.setdefault(i,0.0)
             disconnected_emp.setdefault(i,0.0)
 
-            not_connected.setdefault(i,0.0)
-            connected_w_detour.setdefault(i,0.0)
-            connected.setdefault(i,0.0)
-            emp_not_connected.setdefault(i,0.0)
-            emp_connected_w_detour.setdefault(i,0.0)
-            emp_connected.setdefault(i,0.0)
-
         time_1 = time.time()
-        self.dlg.ui.ConnProgressBar.setValue(10)
+        self.dlg.ui.progress_text.append("done Initiaizations")
         # print "done Initiaizations",time_1 - start
         ####################################################################################
         ################################
@@ -886,7 +867,7 @@ class LTS:
         except Exception, e:
             pass
         time_2 = time.time()
-        self.dlg.ui.ConnProgressBar.setValue(20)
+        self.dlg.ui.progress_text.append("done intersections")
 
         ##################################################################
         ### Select a subset of nodes for analysis ########################
@@ -935,14 +916,14 @@ class LTS:
                 return sampled    
 
         selected_nodes = {}
-        
+        number_tobe_sampled = 5
         for taz, list_of_nodes in taz_dic.iteritems():
             items = sample_geo_nodes(list_of_nodes, number_tobe_sampled)
             selected_nodes[taz] = (items, len(items)) 
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
         #     pickle.dump(selected_nodes,file)
-        # for k,v in selected_nodes.iteritems():
-        #     assert v[1] == number_tobe_sampled, "more/less than 5 sample points"+ str(k)+str(v[1])
+        for k,v in selected_nodes.iteritems():
+            assert v[1] == number_tobe_sampled, "more/less than 5 sample points"
         #####################
         ##################### Save seleceted nodes to a shapefile ########################
         ref_nodes = [] # list of nodes to be written to a shapefile
@@ -976,7 +957,7 @@ class LTS:
         # self.dlg.ui.progress_text.append("length of selected_nodes")
         # self.dlg.ui.progress_text.append(str(len(selected_nodes)))
 
-        self.dlg.ui.ConnProgressBar.setValue(30)
+        self.dlg.ui.progress_text.append("done subset")
 
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
         #     pickle.dump(selected_nodes,file)
@@ -991,14 +972,13 @@ class LTS:
         graph_names = [graph_lts1, graph_lts2, graph_lts3]
         field = str(lts_column)
 
-
         # another approach might be to create one graph at a time and do the analysis for that; more memory efficient???
         for index,lts_thresh in enumerate(lts_threshs ): #fix this
             temp = [(u,v,d) for u,v,d in street_graph.edges_iter(data=True) if d[field] <= lts_thresh]  # set the edges numbers to zero
             graph_names[index] = nx.Graph(temp)
             
         time_4 = time.time()
-        
+        self.dlg.ui.progress_text.append("done making graphs")
 
         counter = 0
         
@@ -1011,17 +991,16 @@ class LTS:
             writer2 = csv.writer(b)
             writer3 = csv.writer(c)
             writer4 = csv.writer(d)
-            csv1_names = ["from", "To", "LTS1 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
+            csv1_names = ["from", "To", "LTS1 distance", "LTS4 distance"]
             writer1.writerow(csv1_names)
-            csv2_names = ["from", "To", "LTS2 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
+            csv2_names = ["from", "To", "LTS2 distance", "LTS4 distance"]
             writer2.writerow(csv2_names)
-            csv3_names = ["from", "To", "LTS3 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
+            csv3_names = ["from", "To", "LTS3 distance", "LTS4 distance"]
             writer3.writerow(csv3_names)
-            csv4_names = ["from", "To", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
+            csv4_names = ["from", "To", "LTS4 distance"]
             writer4.writerow(csv4_names)
 
         ### do the SP analysis
-            temp_total_num = (len(selected_nodes) )* number_tobe_sampled
             for taz, ll  in selected_nodes.iteritems():
                 list_of_nodes = ll[0]
                 num_of_nodes = ll[1]
@@ -1034,9 +1013,12 @@ class LTS:
                     runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
 
                     counter += 1
-                    if counter == floor(temp_total_num /4) : self.dlg.ui.ConnProgressBar.setValue(45)
-                    if counter == floor(temp_total_num /2) : self.dlg.ui.ConnProgressBar.setValue(60)
-                    if counter == floor(3*temp_total_num /4) : self.dlg.ui.ConnProgressBar.setValue(75)
+                    if counter == 100 : print "100", time.time() - time_4
+                    if counter == 300 : print "300", time.time() - time_4
+                    if counter == 600 : print "600", time.time() - time_4
+                    if counter == 900 : print "900", time.time() - time_4
+                    if counter == 1100 : print "1100", time.time() - time_4
+                    if counter == 1500 : print "1500", time.time() - time_4
 
 
 
@@ -1087,7 +1069,7 @@ class LTS:
                         
                         
 
-                    origin_pop = node_graph.node[node]['TAZ2010_PO']  # how long is it gonna take to find these nodes?
+                    origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop/num_of_nodes # how long is it gonna take to find these nodes?
                     assert origin_pop >= 0, "negative Origin Population"
 
                     if runLTS1:
@@ -1098,38 +1080,47 @@ class LTS:
 
                             for dest in list_of_nodes2:
                                 # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                               
-                                assert dest_pop >= 0, "negative Population"
-
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                    #
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
                                 try :
                                     distance = length_lts1[dest]
                                 
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp ))
-                                            #########################
-                                            connected[1] += origin_pop * dest_pop
-                                            emp_connected[1] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[1] += origin_pop * dest_pop
-                                            emp_connected_w_detour[1] += origin_pop * dest_emp
-                                            #########################
-                                            writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                            
+                        
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[1] += origin_pop * dest_pop
+                                        employment_connectivity[1] += origin_pop * dest_emp
+                                        #########################
+                                        writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]))
+                                        #########################
+                                    
+                                    else: 
+                                        disconnected_pop[1] += origin_pop * dest_pop
+                                        disconnected_emp[1] += origin_pop * dest_emp
+                                        #########################
+                                        writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
+                                        #########################
                                 except Exception,e :
                                     #########################
-                                    writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                    writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"Not Connected"))
                                     #########################
-                                    not_connected[1] += origin_pop * dest_pop
-                                    emp_not_connected[1] += origin_pop * dest_emp
+                                    # pass 
                     
 
                     if runLTS2:
@@ -1140,40 +1131,45 @@ class LTS:
 
                             for dest in list_of_nodes2:
                                 # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                               
-                                assert dest_pop >= 0, "negative Population"
-
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                   
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
-
                                 try :
                                     distance = length_lts2[dest]
                                     
-                                    if length_lts4[dest] >= minimum_distance:
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
+                        
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                            # temp += origin_pop * dest_pop2
+                                        assert dest_pop >= 0, "negative Population"
 
-                                            #########################
-                                            writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[2] += origin_pop * dest_pop
-                                            emp_connected[2] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[2] += origin_pop * dest_pop
-                                            emp_connected_w_detour[2] += origin_pop * dest_emp
-                                            #########################
-                                            writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
 
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[2] += origin_pop * dest_pop
+                                        employment_connectivity[2] += origin_pop * dest_emp
+                                        #########################
+                                        writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]))
+                                        #########################
+                                    else: 
+                                        disconnected_pop[2] += origin_pop * dest_pop
+                                        disconnected_emp[2] += origin_pop * dest_emp
+                                        #########################
+                                        writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
+                                        #########################
                                 except Exception,e :
                                     #########################
-                                    writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                    writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"Not Connected"))
                                     #########################
-                                    not_connected[2] += origin_pop * dest_pop
-                                    emp_not_connected[2] += origin_pop * dest_emp
                                     # pass
                         
                     if runLTS3:
@@ -1184,37 +1180,45 @@ class LTS:
 
                             for dest in list_of_nodes2:
                                 # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                                
-                                assert dest_pop >= 0, "negative Population"
-
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                 
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
                                 try :
                                     distance = length_lts3[dest]
                                     
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                                    if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[3] += origin_pop * dest_pop
-                                            emp_connected[3] += origin_pop * dest_emp
-                                        else: 
-                                            connected_w_detour[3] += origin_pop * dest_pop
-                                            emp_connected_w_detour[3] += origin_pop * dest_emp
-                                            #########################
-                                            writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
+                        
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[3] += origin_pop * dest_pop
+                                        employment_connectivity[3] += origin_pop * dest_emp
+                                        #########################
+                                        writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]))
+                                        #########################
+                                    else: 
+                                        disconnected_pop[3] += origin_pop * dest_pop
+                                        disconnected_emp[3] += origin_pop * dest_emp
+                                        #########################
+                                        writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
+                                        #########################
                                 except Exception,e :
                                     #########################
-                                    writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                    writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"Not Connected"))
                                     #########################
-                                    not_connected[3] += origin_pop * dest_pop
-                                    emp_not_connected[3] += origin_pop * dest_emp
                                     # pass 
                         
                     if runLTS4:
@@ -1226,51 +1230,64 @@ class LTS:
                         # if node != dest:
                             for dest in list_of_nodes2:
                                 ###############
-                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
-                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
-                                # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
-                                ###############
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                                       
-                                assert dest_pop >= 0, "negative Population"
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-              
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
+                                sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
+                                ###############
                                 try :
                                     distance = length_lts4[dest]
                                     
                                     if distance >= minimum_distance :
            
-                                        
+                                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']
 
-                                        connected[4] += origin_pop * dest_pop
-                                        emp_connected[4] += origin_pop * dest_emp
+                            # temp += origin_pop * dest_pop
+                                        assert dest_pop >= 0, "negative Population"
+
+                                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']
+
+                            # if distance >= minimum_distance :
+                                
+                                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                                        if dest_emp < 0: dest_emp =0
+                                        assert dest_emp >= 0, "negative employment"
+
+                                # tempDEL.append(origin_pop * dest_pop)
+                                # destDEL.append(dest_pop)
+                                # orgDEL.append(origin_pop)
+
+                                # file.write(str(origin_pop * dest_pop))
+                                        population_connectivity[4] += origin_pop * dest_pop
+                                        employment_connectivity[4] += origin_pop * dest_emp
                                         #########################
-                                        writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],length_lts4[dest],"",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]))
                                         #########################
-                                    # else: 
-                                    #     disconnected_pop[4] += origin_pop * dest_pop
-                                    #     disconnected_emp[4] += origin_pop * dest_emp
-                                    #     #########################
-                                    #     writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
-                                    #     #########################
+                                    else: 
+                                        disconnected_pop[4] += origin_pop * dest_pop
+                                        disconnected_emp[4] += origin_pop * dest_emp
+                                        #########################
+                                        writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
+                                        #########################
                                 except Exception,e :
-                                    not_connected[4] += origin_pop * dest_pop
-                                    emp_not_connected[4] += origin_pop * dest_emp
+                                    disconnected_pop[4] += origin_pop * dest_pop
+                                    disconnected_emp[4] += origin_pop * dest_emp
                                     #########################
-                                    writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                    writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"Not Connected"))
                                     #########################
                                     # pass 
 
 
-    
+        # population_connectivity[4] = population_connectivity[4]/((total_pop*total_pop)/(num_of_nodes*num_of_nodes))
 
         time_5 = time.time()
-        # self.dlg.ui.progress_text.append("Done!")
-        # self.dlg.ui.progress_text.append("home-work[4] is " + str(employment_connectivity[4]))
-        # self.dlg.ui.progress_text.append("home-home[4] is " + str(population_connectivity[4]))
+        self.dlg.ui.progress_text.append("Done!")
+        self.dlg.ui.progress_text.append("home-work[4] is " + str(employment_connectivity[4]))
+        self.dlg.ui.progress_text.append("home-home[4] is " + str(population_connectivity[4]))
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
@@ -1278,26 +1295,19 @@ class LTS:
         a = time.strftime("%H:%M:%S")
         c = a.replace(":","_")
         writefile = save_path+'\\Results '+ c+'.csv'
-        fieldnames = ['LTS level','home to home connected', 'home to work connected']
-        fieldnames2 = ['LTS level','home to home connected_w_detour', 'home to work connected_w_detour']
-        fieldnames3 = ['LTS level','home to home disconnected', 'home to work disconnected']
+        fieldnames = ['LTS level','home to home connectivity', 'home to work connectivity']
+        fieldnames2 = ['LTS level','population_disqualified', 'employment_disqualified']
 
-        self.dlg.ui.ConnProgressBar.setValue(90)
         with open( writefile, 'w' ) as f:
             writer = csv.writer(f)
             writer.writerow(fieldnames)
-            for i in range(1,4):
-                writer.writerow((i,connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i]) , emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,connected[4]/(connected[4] + not_connected[4])))
+            for i in range(1,5):
+                writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
             writer.writerow(fieldnames2)
-            for i in range(1,4):
-                writer.writerow((i,(connected_w_detour[i] + connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_connected_w_detour[i] + emp_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow(fieldnames3)    
-            for i in range(1,4):
-                writer.writerow((i,(not_connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_not_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,not_connected[4]/(connected[4] + not_connected[4]),emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]) ))
+            for i in range(7,11):
+                writer.writerow((i,disconnected_pop[i-6] , disconnected_emp[i-6]))
+            # writer.writerow((13,sanity_dict[4]))
 
-        
         try :
             del street_graph
             del node_graph
@@ -1305,27 +1315,22 @@ class LTS:
             del destination_file
         except:
             pass 
-
-        QMessageBox.information(self.dlg, ("Done"), ("Finished Successfully")) 
-        self.dlg.ui.ConnProgressBar.setValue(100)
-
-        self.dlg.close()
         # delete new files
         ## release the lock http://gis.stackexchange.com/questions/77218/pyqgis-file-lock-release
         
-        for i in ["DELpoints.shp","DELpoints1.shp","DELpoints2.shp","DELpoints3.shp","DELpoints4.shp",
-            "DELpoints.shx","DELpoints1.shx","DELpoints2.shx","DELpoints3.shx","DELpoints4.shx",
-            "DELpoints.dbf","DELpoints1.dbf","DELpoints2.dbf","DELpoints3.dbf","DELpoints4.dbf",
-            "DELpoints.prj","DELpoints1.prj","DELpoints2.prj","DELpoints3.prj","DELpoints4.prj"]:
-            try:
-                target = str(i)
-            #     layer2 = QgsVectorLayer(target, "lyr2", "ogr")
-            #     QgsMapLayerRegistry.instance().addMapLayer(layer2)
-            #     QgsMapLayerRegistry.instance().removeMapLayer(layer2.id())
-            #     # QgsVectorFileWriter.deleteShapeFile(target)
-                os.remove(target)
-            except:
-                pass
+        # for i in ["points.shp","points1.shp","points2.shp","points3.shp","points4.shp"]:
+        #     # "points.shx","points1.shx","points2.shx","points3.shx","points4.shx",
+        #     # "points.dbf","points1.dbf","points2.dbf","points3.dbf","points4.dbf",
+        #     # "points.prj","points1.prj","points2.prj","points3.prj","points4.prj"]:
+        #     # try:
+        #     target = str(i)
+        #     layer2 = QgsVectorLayer(target, "lyr2", "ogr")
+        #     QgsMapLayerRegistry.instance().addMapLayer(layer2)
+        #     QgsMapLayerRegistry.instance().removeMapLayer(layer2.id())
+        #     # QgsVectorFileWriter.deleteShapeFile(target)
+        #     # os.remove(target)
+        #     # except:
+        #     #     pass
         # try:
         #     del layer2
         #     del nlayer
@@ -1358,9 +1363,9 @@ class LTS:
     def run(self):
         # show the dialog
         self.dlg.show()
+        self.dlg.ui.progress_text.clear()
         self.dlg.ui.progressBar.setValue(0)
         self.dlg.ui.progress_bar.setValue(0)
-        self.dlg.ui.ConnProgressBar.setValue(0)
         self.dlg.ui.layerCombo.clear()
         self.dlg.ui.lts_combo.clear()
         self.dlg.ui.road_combo.clear()
