@@ -264,100 +264,32 @@ def write_shp(G, outdir,edges_name):
 
     nodes, edges = None, None
 
-def nodes_write_shp(G, outdir,nodes_name):
-    """Writes a networkx.DiGraph to two shapefiles, edges and nodes.
-    Nodes and edges are expected to have a Well Known Binary (Wkb) or
-    Well Known Text (Wkt) key in order to generate geometries. Also
-    acceptable are nodes with a numeric tuple key (x,y).
 
-    "The Esri Shapefile or simply a shapefile is a popular geospatial vector
-    data format for geographic information systems software [1]_."
-
-    Parameters
-    ----------
-    outdir : directory path
-       Output directory for the two shapefiles.
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    nx.write_shp(digraph, '/shapefiles') # doctest +SKIP
-
-    References
-    ----------
-    .. [1] http://en.wikipedia.org/wiki/Shapefile
-    """
-    try:
-        from osgeo import ogr
-    except ImportError:
-        raise ImportError("write_shp requires OGR: http://www.gdal.org/")
-    # easier to debug in python if ogr throws exceptions
-    ogr.UseExceptions()
-
-    def netgeometry(key, data):
-        if 'Wkb' in data:
-            geom = ogr.CreateGeometryFromWkb(data['Wkb'])
-        elif 'Wkt' in data:
-            geom = ogr.CreateGeometryFromWkt(data['Wkt'])
-        elif type(key[0]).__name__ == 'tuple':  # edge keys are packed tuples
-            geom = ogr.Geometry(ogr.wkbLineString)
-            _from, _to = key[0], key[1]
-            try:
-                geom.SetPoint(0, *_from)
-                geom.SetPoint(1, *_to)
-            except TypeError:
-                # assume user used tuple of int and choked ogr
-                _ffrom = [float(x) for x in _from]
-                _fto = [float(x) for x in _to]
-                geom.SetPoint(0, *_ffrom)
-                geom.SetPoint(1, *_fto)
-        else:
-            geom = ogr.Geometry(ogr.wkbPoint)
-            try:
-                geom.SetPoint(0, *key)
-            except TypeError:
-                # assume user used tuple of int and choked ogr
-                fkey = [float(x) for x in key]
-                geom.SetPoint(0, *fkey)
-
-        return geom
-
-    # Create_feature with new optional attributes arg (should be dict type)
-    def create_feature(geometry, lyr, attributes=None):
-        feature = ogr.Feature(lyr.GetLayerDefn())
-        feature.SetGeometry(g)
-        if attributes != None:
-            # Loop through attributes, assigning data to each field
-            for field, data in attributes.iteritems():
-                feature.SetField(field, data)
-        lyr.CreateFeature(feature)
-        feature.Destroy()
-
-    drv = ogr.GetDriverByName("ESRI Shapefile")
-    shpdir = drv.CreateDataSource(outdir)
-    # delete pre-existing output first otherwise ogr chokes
-    try:
-        shpdir.DeleteLayer(nodes_name)
-    except:
-        pass
-    nodes = shpdir.CreateLayer(nodes_name, None, ogr.wkbPoint)
-    for n in G:
-        data = G.node[n] or {}
-        g = netgeometry(n, data)
-        create_feature(g, nodes)
-    # try:
-    #     shpdir.DeleteLayer(edges_name)
-    # except:
-    #     pass
-    # edges = shpdir.CreateLayer(edges_name, None, ogr.wkbLineString)
-
-  
-
-    nodes, edges = None, None
 # fixture for nose tests
+def setup_module(module):
+    from nose import SkipTest
+    try:
+        import ogr
+    except:
+        raise SkipTest("OGR not available")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -724,15 +656,12 @@ class LTS:
 
 
     def compute_connectivity(self):
-        import time 
         #################################### Inputs and Initiaizations#######################################
         '''
         Should get lts_column from a combobox
         Networkx doesn't return a length if there is no path between the two points; it simply ignores it
         '''
-        self.dlg.ui.ConnProgressBar.setValue(2)
-
-        
+        self.dlg.ui.progress_text.setText("Start")
 
         index = self.dlg.ui.LtsColumn.currentIndex() 
         if index < 0: 
@@ -741,7 +670,7 @@ class LTS:
         else: 
             lts_column = self.dlg.ui.LtsColumn.itemData(index)
         
-        
+        self.dlg.ui.progress_text.append(str(type(lts_column)))
 
         index = self.dlg.ui.road_combo.currentIndex() 
         if index < 0:  
@@ -770,25 +699,12 @@ class LTS:
 
         total_pop = 0.0; total_emp = 0.0
         for g in qgis_taz_layer.getFeatures():
-            if g['taz2010_Po'] >= 0:
-                total_pop += g['taz2010_Po']
-            if g['taz2010_Em'] >= 0:
-                total_emp += g['taz2010_Em']
-
-        self.dlg.ui.ConnProgressBar.setValue(5)
+            total_pop += g['taz2010_Po']
+            total_emp += g['taz2010_Em']
 
         maximum_distance = int(self.dlg.ui.maxDist.text())       # 1000 #in ft
         minimum_distance = int(self.dlg.ui.minDist.text())       # 15 # in ft
         detour_coeff = float(self.dlg.ui.Detour_coeff.text())      # 1.33 # if lts2.length <= 1.33 lts4.length : connected Detour_coeff
-        number_tobe_sampled = int(self.dlg.ui.numberSamplePoints.text())
-
-        not_connected = {}
-        connected_w_detour = {} 
-        connected = {}
-        emp_not_connected = {}
-        emp_connected_w_detour = {} 
-        emp_connected = {}
-
 
         disconnected_pop = {}
         disconnected_emp = {}
@@ -800,51 +716,34 @@ class LTS:
             disconnected_pop.setdefault(i,0.0)
             disconnected_emp.setdefault(i,0.0)
 
-            not_connected.setdefault(i,0.0)
-            connected_w_detour.setdefault(i,0.0)
-            connected.setdefault(i,0.0)
-            emp_not_connected.setdefault(i,0.0)
-            emp_connected_w_detour.setdefault(i,0.0)
-            emp_connected.setdefault(i,0.0)
-
         time_1 = time.time()
-        self.dlg.ui.ConnProgressBar.setValue(10)
+        self.dlg.ui.progress_text.append("done Initiaizations")
         # print "done Initiaizations",time_1 - start
         ####################################################################################
-        ################################
-        # create folder for keeping logs and results
-        
 
-        a = time.ctime()
-        c = a.replace(":","_")
-        os.chdir(myfilepath)
-        os.mkdir("Results "+ c)
-        os.chdir("Results "+ c)
-        save_path = os.getcwd()
-        ################################
         # c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer,'C:/Users/Peyman.n/Dropbox/Boulder/Shapefies from internet/points') # get intersection points
-        destination_file = str(save_path) + '/DELpoints.shp'
+        destination_file = str(myfilepath) + '/points.shp'
         c=processing.runalg("saga:convertpolygonlineverticestopoints",rd_layer, destination_file) # get intersection points
         
         # self.dlg.ui.progress_text.append(destination_file)
 
         vlayer = QgsVectorLayer(destination_file, "points", "ogr")
 
-        destination_file = str(save_path) + '/DELpoints1.shp'
+        destination_file = str(myfilepath) + '/points1.shp'
         c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
             qgis_taz_layer,"taz2010_PO",destination_file)
         vlayer = QgsVectorLayer(destination_file, "points1", "ogr")
 
         # self.dlg.ui.progress_text.append(destination_file)
 
-        destination_file = str(save_path) + '/DELpoints2.shp'
+        destination_file = str(myfilepath) + '/points2.shp'
         c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
             qgis_taz_layer,"taz2010_EM",destination_file)
         vlayer = QgsVectorLayer(destination_file, "points2", "ogr")
 
         # self.dlg.ui.progress_text.append(destination_file)
 
-        destination_file = str(save_path) + '/DELpoints3.shp'
+        destination_file = str(myfilepath) + '/points3.shp'
         c=processing.runalg("saga:addpolygonattributestopoints",vlayer,
             qgis_taz_layer,"TAZ_ID",destination_file)
         vlayer = QgsVectorLayer(destination_file, "points3", "ogr")
@@ -852,19 +751,10 @@ class LTS:
         # self.dlg.ui.progress_text.append(destination_file)
 
         # REMOVE DUPLICATES
-        destination_file = str(save_path) + '/DELpoints4.shp'
+        destination_file = str(str(myfilepath) + '/points44.shp')
         c=processing.runalg("saga:removeduplicatepoints",vlayer,"ID_SHAPE",0,0,destination_file)
         # self.dlg.ui.progress_text.append(destination_file)
-        vlayer = QgsVectorLayer(destination_file, "points4", "ogr")
-        # make a unique id column for each point
-        vlayer.startEditing()
-        self.make_column(vlayer,"qID")
-        index = vlayer.fieldNameIndex("qID")
-        for feature in vlayer.getFeatures():
-            _ = vlayer.changeAttributeValue( feature.id() ,  index , str(feature.id()) );
-        vlayer.commitChanges()
-
-
+        vlayer = QgsVectorLayer(destination_file, "points44", "ogr")
 
 
 
@@ -872,125 +762,77 @@ class LTS:
         ### make a graph out of nodes and street layer
         # Node graph with attributes
         node_graph = node_layer.to_undirected()
-
-        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\nodesgraoh.txt","w") as file:
-        #     pickle.dump(node_graph,file)
         # Street graph
         street_graph = road_layer.to_undirected()
         try:
             del vlayer
             del c
             del node_layer
-            # del destination_file
+            del destination_file
 
         except Exception, e:
             pass
         time_2 = time.time()
-        self.dlg.ui.ConnProgressBar.setValue(20)
+        self.dlg.ui.progress_text.append("done intersections")
 
         ##################################################################
         ### Select a subset of nodes for analysis ########################
         taz_dic = {}
         # list_of_random_nodes = []
         for node, attr in node_graph.nodes_iter(data=True):
-            taz_dic.setdefault(int(attr['TAZ_ID']),[]).append(node) 
+            taz_dic.setdefault(attr['TAZ_ID'],[]).append(node) 
         try:
-            del taz_dic[0]
+            del taz_dic[0.0]
         except:
             pass
         # self.dlg.ui.progress_text.append(str(len(taz_dic)))
 
-        # selected_nodes = []
-
+        selected_nodes = []
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\taz_dic.txt","w") as file:
         #     pickle.dump(taz_dic,file)
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\street_graph.txt","w") as file:
         #     pickle.dump(street_graph,file)
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\node_graph.txt","w") as file:
         #     pickle.dump(node_graph,file)
-        def sample_geo_nodes(list_of_nodes, number_of_points_wanted, street_graph = street_graph):
-            ''' returns a list,samples nodes that are m apart'''
-            # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\sample_points_log.txt","w") as debug:
-            number_of_given_nodes = len(list_of_nodes)
-            number_of_points = 0
-            if number_of_given_nodes <= number_of_points_wanted:
-                # debug.write("number_of_given_nodes <= number_of_points_wanted\n")
-                return list_of_nodes
-            items = random.sample(list_of_nodes, number_of_points_wanted)
-            number_of_red_nodes = 0
-            sampled = [node for node in items if node in street_graph.nodes()]
-            remainder = [node for node in list_of_nodes if node not in items]
-            sampled_length = len(sampled)
-            remainder_length = len(remainder)
-            number_needed = number_of_points_wanted - sampled_length
-            if number_needed > 0:
-                if number_needed <= remainder_length:
-                    new_items = sample_geo_nodes(remainder, number_needed)
-                    sampled.extend(new_items)
-                else:
-                    new_items = remainder
-                    sampled.extend(new_items)
-                return sampled 
-            else:
-                return sampled    
 
-        selected_nodes = {}
-        
+
+
         for taz, list_of_nodes in taz_dic.iteritems():
-            items = sample_geo_nodes(list_of_nodes, number_tobe_sampled)
-            selected_nodes[taz] = (items, len(items)) 
-        # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
-        #     pickle.dump(selected_nodes,file)
-        # for k,v in selected_nodes.iteritems():
-        #     assert v[1] == number_tobe_sampled, "more/less than 5 sample points"+ str(k)+str(v[1])
-        #####################
-        ##################### Save seleceted nodes to a shapefile ########################
-        ref_nodes = [] # list of nodes to be written to a shapefile
-        for k,v in selected_nodes.iteritems():
-            ref_nodes.extend(v[0])
-        
-        ref_ids = [] # ids of features to be saved
-        for node in ref_nodes:
-            ref_ids.append(node_graph.node[node]["qID"])
-        
-        nlayer = QgsVectorLayer(destination_file, "mmmn", "ogr")
-        nlayer.removeSelection()
-        # self.dlg.ui.progress_text.append(str(vlayer.selectedFeatureCount()))
-        nlayer.setSelectedFeatures(ref_ids)
-        # self.dlg.ui.progress_text.append(str(vlayer.selectedFeatureCount()))
-        dest_file = str(save_path) + '//ReferencePoints.shp'
-        from processing.tools import dataobjects, vector
-        from processing.core.VectorWriter import VectorWriter
-
-        provider = nlayer.dataProvider()
-        writer = VectorWriter(dest_file,None, provider.fields(),
-                provider.geometryType(), nlayer.crs())
-        features = vector.features(nlayer)
-        for feat in features:
-            writer.addFeature(feat)
-        del writer
-        # c=processing.runalg("script:saveselectedfeatures",nlayer, dest_file)
+            number_of_points = min(5,len(list_of_nodes) )
+            passed_nodes = 0
+            for i in range( number_of_points*5 ): # check 5 times more points
+                if passed_nodes >= number_of_points: 
+                    break
+                item = random.sample(list_of_nodes, 1) #choose 10 features
+                if item[0] in street_graph.nodes():
+                    passed_nodes += 1
+                    selected_nodes.extend(item)
 
 
         time_3 = time.time()
         # self.dlg.ui.progress_text.append("length of selected_nodes")
         # self.dlg.ui.progress_text.append(str(len(selected_nodes)))
 
-        self.dlg.ui.ConnProgressBar.setValue(30)
+        self.dlg.ui.progress_text.append("done subset")
 
         # with open("C:\Users\Peyman.n\Dropbox\Boulder\Shapefies from internet\\selected_nodes.txt","w") as file:
         #     pickle.dump(selected_nodes,file)
         #####
+        # some analysis of average network connectivity
+        # node_info1 = {}; node_info2 = {}; node_info3 = {}; node_info4 = {}; 
+        # all_cons_nodes = {} # node: population
+        ### do the SP analysis
+        # missing_nodes1=0; missing_nodes2=0; missing_nodes3=0; missing_nodes4=0;
+        # runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
 
         
         ##################################################################
-        sanity_dict = {};sanity_dict[4] = 0
+
         ### make a graph for each level of lts
         lts_threshs = [1,2,3]
         graph_lts1=[]; graph_lts2=[]; graph_lts3=[]
         graph_names = [graph_lts1, graph_lts2, graph_lts3]
         field = str(lts_column)
-
 
         # another approach might be to create one graph at a time and do the analysis for that; more memory efficient???
         for index,lts_thresh in enumerate(lts_threshs ): #fix this
@@ -998,359 +840,253 @@ class LTS:
             graph_names[index] = nx.Graph(temp)
             
         time_4 = time.time()
-        
+        self.dlg.ui.progress_text.append("done making graphs")
 
         counter = 0
         
-        with open(save_path+ "\\lts1_log.csv", 'w') as a, \
-            open(save_path + "\\lts2_log.csv", 'w')  as b, \
-            open(save_path + "\\lts3_log.csv", 'w') as c, \
-            open(save_path+  "\\lts4_log.csv", 'w') as d:
-
-            writer1 = csv.writer(a)
-            writer2 = csv.writer(b)
-            writer3 = csv.writer(c)
-            writer4 = csv.writer(d)
-            csv1_names = ["from", "To", "LTS1 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
-            writer1.writerow(csv1_names)
-            csv2_names = ["from", "To", "LTS2 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
-            writer2.writerow(csv2_names)
-            csv3_names = ["from", "To", "LTS3 distance", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
-            writer3.writerow(csv3_names)
-            csv4_names = ["from", "To", "LTS4 distance","comment","origin Pop weight", "dest pop weight", "dest emp weight"]
-            writer4.writerow(csv4_names)
 
         ### do the SP analysis
-            temp_total_num = (len(selected_nodes) )* number_tobe_sampled
-            for taz, ll  in selected_nodes.iteritems():
-                list_of_nodes = ll[0]
-                num_of_nodes = ll[1]
-                for node in list_of_nodes:
+        for node in selected_nodes:
 
-                ###########
-                    # all_cons_nodes[node] = node_graph.node[node]['TAZ2010_PO']/total_pop
-                    ###########
-                    pnts1 = 0; pnts2 = 0; pnts3 = 0; pnts4 = 0;
-                    runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
+            ###########
+            # all_cons_nodes[node] = node_graph.node[node]['TAZ2010_PO']/total_pop
+            ###########
+            pnts1 = 0; pnts2 = 0; pnts3 = 0; pnts4 = 0;
+            runLTS4 = False; runLTS3 = False; runLTS2 = False; runLTS1 = False; 
 
-                    counter += 1
-                    if counter == floor(temp_total_num /4) : self.dlg.ui.ConnProgressBar.setValue(45)
-                    if counter == floor(temp_total_num /2) : self.dlg.ui.ConnProgressBar.setValue(60)
-                    if counter == floor(3*temp_total_num /4) : self.dlg.ui.ConnProgressBar.setValue(75)
-
+            counter += 1
+            if counter == 100 : print "100", time.time() - time_4
+            if counter == 300 : print "300", time.time() - time_4
+            if counter == 600 : print "600", time.time() - time_4
+            if counter == 900 : print "900", time.time() - time_4
+            if counter == 1100 : print "1100", time.time() - time_4
+            if counter == 1500 : print "1500", time.time() - time_4
 
 
 
-                    # Dictionary of shortest lengths keyed by target.{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
-                    # if pnts4 < 5 : # this is just to make sure that the selected node is not one of the 89 nodes that are "extra" in node layer
-                    try:
-                        length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance)
 
-                        # node_info4[node] = len (length_lts4.keys())
-                        pnts4 += 1
-                        runLTS4 = True
-                    except Exception, e: # node not in that LTS network -> not connected
-                        # missing_nodes4 += 1                                                 
-                        continue  # if it's not in LTS4 graph, then it is not in the others either, so just "continue" to the next one
+            # Dictionary of shortest lengths keyed by target.{0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+            if pnts4 < 5 : # this is just to make sure that the selected node is not one of the 89 nodes that are "extra" in node layer
+                try:
+                    length_lts4=nx.single_source_dijkstra_path_length(street_graph, node, weight='LEN', cutoff=maximum_distance)
+                    # node_info4[node] = len (length_lts4.keys())
+                    pnts4 += 1
+                    runLTS4 = True
+                except Exception, e: # node not in that LTS network -> not connected
+                    # missing_nodes4 += 1                                                 
+                    continue  # if it's not in LTS4 graph, then it is not in the others either, so just "continue" to the next one
 
-                # if pnts3 < 5 :
-                    try:
-                        length_lts3=nx.single_source_dijkstra_path_length(graph_names[2], node, weight='LEN', cutoff=maximum_distance) 
-                        # node_info3[node] = len (length_lts3.keys())
-                        pnts3 += 1
-                        runLTS3 = True
-                    except Exception, e: # node not in that LTS network -> not connected
-                        # missing_nodes3 += 1  
-                        pass
-                         
-                # if pnts2 < 5 :
-                    try:
-                        length_lts2=nx.single_source_dijkstra_path_length(graph_names[1], node, weight='LEN', cutoff=maximum_distance) 
-                        # node_info2[node] = len (length_lts2.keys())
-                        pnts2 += 1
-                        runLTS2 = True
+            if pnts3 < 5 :
+                try:
+                    length_lts3=nx.single_source_dijkstra_path_length(graph_names[2], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info3[node] = len (length_lts3.keys())
+                    pnts3 += 1
+                    runLTS3 = True
+                except Exception, e: # node not in that LTS network -> not connected
+                    # missing_nodes3 += 1  
+                    pass
+                     
+            if pnts2 < 5 :
+                try:
+                    length_lts2=nx.single_source_dijkstra_path_length(graph_names[1], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info2[node] = len (length_lts2.keys())
+                    pnts2 += 1
+                    runLTS2 = True
 
-                    except Exception, e:
-                        pass
-                        # missing_nodes2 += 1                                                 
-                         
-                # if pnts1 < 5 :  
-                    try:
-                        length_lts1=nx.single_source_dijkstra_path_length(graph_names[0], node, weight='LEN', cutoff=maximum_distance) 
-                        # node_info1[node] = len (length_lts1.keys())
-                        pnts1 += 1
-                        runLTS1 = True
+                except Exception, e:
+                    pass
+                    # missing_nodes2 += 1                                                 
+                     
+            if pnts1 < 5 :  
+                try:
+                    length_lts1=nx.single_source_dijkstra_path_length(graph_names[0], node, weight='LEN', cutoff=maximum_distance) 
+                    # node_info1[node] = len (length_lts1.keys())
+                    pnts1 += 1
+                    runLTS1 = True
 
-                    except Exception, e:
-                        # missing_nodes1 += 1 
-                        pass                                                
-                        
-                        
+                except Exception, e:
+                    # missing_nodes1 += 1 
+                    pass                                                
+                    
+                
 
-                    origin_pop = node_graph.node[node]['TAZ2010_PO']  # how long is it gonna take to find these nodes?
-                    assert origin_pop >= 0, "negative Origin Population"
+            origin_pop = node_graph.node[node]['TAZ2010_PO'] /total_pop/5 # how long is it gonna take to find these nodes?
+            assert origin_pop >= 0, "negative Origin Population"
 
-                    if runLTS1:
-                        # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
+            if runLTS1:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts1[dest]
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                               
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
+                    # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                    #
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
+                    # if distance >= minimum_distance :
+                        
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
                                 if dest_emp < 0: dest_emp =0
                                 assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance = length_lts1[dest]
-                                
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp ))
-                                            #########################
-                                            connected[1] += origin_pop * dest_pop
-                                            emp_connected[1] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[1] += origin_pop * dest_pop
-                                            emp_connected_w_detour[1] += origin_pop * dest_emp
-                                            #########################
-                                            writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                            
-                                except Exception,e :
-                                    #########################
-                                    writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[1] += origin_pop * dest_pop
-                                    emp_not_connected[1] += origin_pop * dest_emp
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[1] += origin_pop * dest_pop
+                                employment_connectivity[1] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[1] += origin_pop * dest_pop
+                                disconnected_emp[1] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
                     
 
-                    if runLTS2:
-                        # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
+            if runLTS2:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts2[dest]
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
 
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                               
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
+                    # temp += origin_pop * dest_pop
                                 assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                   
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
-
-                                try :
-                                    distance = length_lts2[dest]
-                                    
-                                    if length_lts4[dest] >= minimum_distance:
-                                        if distance <= detour_coeff * length_lts4[dest] :
-
-
-                                            #########################
-                                            writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[2] += origin_pop * dest_pop
-                                            emp_connected[2] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[2] += origin_pop * dest_pop
-                                            emp_connected_w_detour[2] += origin_pop * dest_emp
-                                            #########################
-                                            writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-
-                                except Exception,e :
-                                    #########################
-                                    writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[2] += origin_pop * dest_pop
-                                    emp_not_connected[2] += origin_pop * dest_emp
-                                    # pass
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
+                    # if distance >= minimum_distance :
                         
-                    if runLTS3:
-                        # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
-
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                                
-                                assert dest_pop >= 0, "negative Population"
-
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                 
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
                                 if dest_emp < 0: dest_emp =0
                                 assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance = length_lts3[dest]
-                                    
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[3] += origin_pop * dest_pop
-                                            emp_connected[3] += origin_pop * dest_emp
-                                        else: 
-                                            connected_w_detour[3] += origin_pop * dest_pop
-                                            emp_connected_w_detour[3] += origin_pop * dest_emp
-                                            #########################
-                                            writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                except Exception,e :
-                                    #########################
-                                    writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[3] += origin_pop * dest_pop
-                                    emp_not_connected[3] += origin_pop * dest_emp
-                                    # pass 
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[2] += origin_pop * dest_pop
+                                employment_connectivity[2] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[2] += origin_pop * dest_pop
+                                disconnected_emp[2] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
+                    
+            if runLTS3:
+                # try:
+                for dest in selected_nodes:
+                    if node != dest:
+                        try :
+                            distance = length_lts3[dest]
+                            if length_lts4[dest] >= minimum_distance and distance <= detour_coeff * length_lts4[dest] :
+
+                
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
+                    # temp += origin_pop * dest_pop
+                                assert dest_pop >= 0, "negative Population"
+
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
+                    # if distance >= minimum_distance :
                         
-                    if runLTS4:
-                        # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
-                            # origin_pop = node_graph.node[node]['TAZ2010_PO'] 
-                        # if node != dest:
-                            for dest in list_of_nodes2:
-                                ###############
-                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
-                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
-                                # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
-                                ###############
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
-                                       
-                                assert dest_pop >= 0, "negative Population"
-
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-              
+                        # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                        # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                        # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
                                 if dest_emp < 0: dest_emp =0
                                 assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance = length_lts4[dest]
-                                    
-                                    if distance >= minimum_distance :
-           
-                                        
 
-                                        connected[4] += origin_pop * dest_pop
-                                        emp_connected[4] += origin_pop * dest_emp
-                                        #########################
-                                        writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],length_lts4[dest],"",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                        #########################
-                                    # else: 
-                                    #     disconnected_pop[4] += origin_pop * dest_pop
-                                    #     disconnected_emp[4] += origin_pop * dest_emp
-                                    #     #########################
-                                    #     writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"disqualified"))
-                                    #     #########################
-                                except Exception,e :
-                                    not_connected[4] += origin_pop * dest_pop
-                                    emp_not_connected[4] += origin_pop * dest_emp
-                                    #########################
-                                    writer4.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    # pass 
+                        # tempDEL.append(origin_pop * dest_pop)
+                        # destDEL.append(dest_pop)
+                        # orgDEL.append(origin_pop)
+
+                        # file.write(str(origin_pop * dest_pop))
+                                population_connectivity[3] += origin_pop * dest_pop
+                                employment_connectivity[3] += origin_pop * dest_emp
+                            else: 
+                                disconnected_pop[3] += origin_pop * dest_pop
+                                disconnected_emp[3] += origin_pop * dest_emp
+                        except Exception,e :
+                            pass 
+                    
+            if runLTS4:
+                # try:
+                for dest in selected_nodes:
+                    # if node != dest:
+                    try :
+                        distance = length_lts4[dest]
+                        # if distance >= minimum_distance :
+
+            
+                        dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/5
+            # temp += origin_pop * dest_pop
+                        assert dest_pop >= 0, "negative Population"
+
+                        dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/5
+            # if distance >= minimum_distance :
+                
+                # origin_pop = node_graph.nodes()[node]['Pop'] # how long is it gonna take to find these nodes?
+                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop
+                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp
+                        if dest_emp < 0: dest_emp =0
+                        assert dest_emp >= 0, "negative employment"
+
+                # tempDEL.append(origin_pop * dest_pop)
+                # destDEL.append(dest_pop)
+                # orgDEL.append(origin_pop)
+
+                # file.write(str(origin_pop * dest_pop))
+                        population_connectivity[4] += origin_pop * dest_pop
+                        employment_connectivity[4] += origin_pop * dest_emp
+                        # else: 
+                        #     disconnected_pop[4] += origin_pop * dest_pop
+                        #     disconnected_emp[4] += origin_pop * dest_emp
+                    except Exception,e :
+                        pass 
 
 
-    
 
         time_5 = time.time()
-        # self.dlg.ui.progress_text.append("Done!")
-        # self.dlg.ui.progress_text.append("home-work[4] is " + str(employment_connectivity[4]))
-        # self.dlg.ui.progress_text.append("home-home[4] is " + str(population_connectivity[4]))
+        self.dlg.ui.progress_text.append("Done!")
+        self.dlg.ui.progress_text.append("employment_connectivity[4] is " + str(employment_connectivity[4]))
+        self.dlg.ui.progress_text.append("population_connectivity[4] is " + str(population_connectivity[4]))
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
-        import time 
-        a = time.strftime("%H:%M:%S")
-        c = a.replace(":","_")
-        writefile = save_path+'\\Results '+ c+'.csv'
-        fieldnames = ['LTS level','home to home connected', 'home to work connected']
-        fieldnames2 = ['LTS level','home to home connected_w_detour', 'home to work connected_w_detour']
-        fieldnames3 = ['LTS level','home to home disconnected', 'home to work disconnected']
+        writefile = myfilepath+'/result.csv'
+        fieldnames = ['LTS level','population_connectivity', 'employment_connectivity']
+        fieldnames2 = ['LTS level','population_disqualified', 'employment_disqualified']
 
-        self.dlg.ui.ConnProgressBar.setValue(90)
         with open( writefile, 'w' ) as f:
             writer = csv.writer(f)
             writer.writerow(fieldnames)
-            for i in range(1,4):
-                writer.writerow((i,connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i]) , emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,connected[4]/(connected[4] + not_connected[4])))
+            for i in range(1,5):
+                writer.writerow((i,population_connectivity[i] , employment_connectivity[i]))
             writer.writerow(fieldnames2)
-            for i in range(1,4):
-                writer.writerow((i,(connected_w_detour[i] + connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_connected_w_detour[i] + emp_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow(fieldnames3)    
-            for i in range(1,4):
-                writer.writerow((i,(not_connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_not_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,not_connected[4]/(connected[4] + not_connected[4]),emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]) ))
+            for i in range(7,10):
+                writer.writerow((i,disconnected_pop[i-6] , disconnected_emp[i-6]))
 
-        
-        try :
-            del street_graph
-            del node_graph
-            del node_layer
-            del destination_file
-        except:
-            pass 
-
-        QMessageBox.information(self.dlg, ("Done"), ("Finished Successfully")) 
-        self.dlg.ui.ConnProgressBar.setValue(100)
-
-        self.dlg.close()
         # delete new files
-        ## release the lock http://gis.stackexchange.com/questions/77218/pyqgis-file-lock-release
-        
-        for i in ["DELpoints.shp","DELpoints1.shp","DELpoints2.shp","DELpoints3.shp","DELpoints4.shp",
-            "DELpoints.shx","DELpoints1.shx","DELpoints2.shx","DELpoints3.shx","DELpoints4.shx",
-            "DELpoints.dbf","DELpoints1.dbf","DELpoints2.dbf","DELpoints3.dbf","DELpoints4.dbf",
-            "DELpoints.prj","DELpoints1.prj","DELpoints2.prj","DELpoints3.prj","DELpoints4.prj"]:
+        for i in ["\\points.shp","\\points1.shp","\\points2.shp","\\points3.shp","\\points4.shp",
+            "\\points.shx","\\points1.shx","\\points2.shx","\\points3.shx","\\points4.shx",
+            "\\points.dbf","\\points1.dbf","\\points2.dbf","\\points3.dbf","\\points4.dbf",
+            "\\points.prj","\\points1.prj","\\points2.prj","\\points3.prj","\\points4.prj"]:
             try:
-                target = str(i)
-            #     layer2 = QgsVectorLayer(target, "lyr2", "ogr")
-            #     QgsMapLayerRegistry.instance().addMapLayer(layer2)
-            #     QgsMapLayerRegistry.instance().removeMapLayer(layer2.id())
-            #     # QgsVectorFileWriter.deleteShapeFile(target)
+                target = str( myfilepath + i)
                 os.remove(target)
             except:
                 pass
-        # try:
-        #     del layer2
-        #     del nlayer
-        #     os.remove( str( save_path + "\\points.shp"))
-        # except:
-        #     pass 
-        # import gc 
-        # gc.collect()
-        # for i in ["points.shp","points1.shp","points2.shp","points3.shp","points4.shp"]:
-        #     QgsVectorFileWriter.deleteShapeFile(i)
-        # self.delete_connectivity_temp_files(save_path)
-        # import shutil
-        # os.mkdir("delete")
-        # # os.chdir("delete")
-        # for i in ["points.shp","points1.shp","points2.shp","points3.shp","points4.shp",
-        #     "points.shx","points1.shx","points2.shx","points3.shx","points4.shx",
-        #     "points.dbf","points1.dbf","points2.dbf","points3.dbf","points4.dbf",
-        #     "points.prj","points1.prj","points2.prj","points3.prj","points4.prj"]:
-        #     try:
-        #         src = str(i)
-        #         shutil.move(src,"delete")
-        #     except:
-        #         pass        
 
-    
 ##########################
 
 
@@ -1358,9 +1094,9 @@ class LTS:
     def run(self):
         # show the dialog
         self.dlg.show()
+        self.dlg.ui.progress_text.clear()
         self.dlg.ui.progressBar.setValue(0)
         self.dlg.ui.progress_bar.setValue(0)
-        self.dlg.ui.ConnProgressBar.setValue(0)
         self.dlg.ui.layerCombo.clear()
         self.dlg.ui.lts_combo.clear()
         self.dlg.ui.road_combo.clear()
