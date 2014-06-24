@@ -1307,26 +1307,43 @@ class LTS:
         a = time.strftime("%H:%M:%S")
         c = a.replace(":","_")
         writefile = save_path+'\\Results '+ c+'.csv'
-        fieldnames = ['LTS level','home to home connected', 'home to work connected']
-        fieldnames2 = ['LTS level','home to home connected_w_detour', 'home to work connected_w_detour']
-        fieldnames3 = ['LTS level','home to home disconnected', 'home to work disconnected']
+        field_headings_1 = ['Home to Home Connectivity']
+        field_headings_2 = ['Home to Work Connectivity']
+
+        fieldnames = ['LTS level','Connected', 'Requires excessive detour','Not connected at all']
+        # fieldnames2 = ['LTS level','home to home connected_w_detour', 'home to work connected_w_detour']
+        # fieldnames3 = ['LTS level','home to home disconnected', 'home to work disconnected']
 
         self.dlg.ui.ConnProgressBar.setValue(90)
         with open( writefile, 'w' ) as f:
             writer = csv.writer(f)
+            writer.writerow(field_headings_1)
             writer.writerow(fieldnames)
             for i in range(1,4):
-                writer.writerow((i,connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i]) , emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,connected[4]/(connected[4] + not_connected[4]), emp_connected[4]/(emp_connected[4] + emp_not_connected[4])))
-            writer.writerow(fieldnames2)
-            for i in range(1,4):
-                writer.writerow((i,(connected_w_detour[i] + connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_connected_w_detour[i] + emp_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow(fieldnames3)    
-            for i in range(1,4):
-                writer.writerow((i,(not_connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_not_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-            writer.writerow((4,not_connected[4]/(connected[4] + not_connected[4]),emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]) ))
+                writer.writerow((i,(connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i])) , (connected_w_detour[i] /(connected[i] + connected_w_detour[i] + not_connected[i])) , (not_connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i])),
+                        (connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i])) + (connected_w_detour[i] /(connected[i] + connected_w_detour[i] + not_connected[i])) +   (not_connected[i]/(connected[i] + connected_w_detour[i] + not_connected[i]))  ))
+            writer.writerow((4,connected[4]/(connected[4] + not_connected[4]), 0, (not_connected[4]/(connected[4] + not_connected[4])), (connected[4]/(connected[4] + not_connected[4]))+ (not_connected[4]/(connected[4] + not_connected[4]))))
+            writer.writerow((""))           
 
-        
+            writer.writerow(field_headings_2)
+            writer.writerow(fieldnames)
+            for i in range(1,4):
+                writer.writerow((i,(emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) , (emp_connected_w_detour[i] /(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) , (emp_not_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])),
+                        (emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) + (emp_connected_w_detour[i] /(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) +   (emp_not_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i]))  ))
+            writer.writerow((4,emp_connected[4]/(emp_connected[4] + emp_not_connected[4]), 0, (emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4])), (emp_connected[4]/(emp_connected[4] + emp_not_connected[4]))+ (emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]))))
+            writer.writerow((""))      
+
+
+        #     writer.writerow(fieldnames2)
+        #     for i in range(1,4):
+        #         writer.writerow((i,(connected_w_detour[i] + connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_connected_w_detour[i] + emp_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
+        #     writer.writerow(fieldnames3)    
+        #     for i in range(1,4):
+        #         writer.writerow((i,(not_connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_not_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
+        #     writer.writerow((4,not_connected[4]/(connected[4] + not_connected[4]),emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]) ))
+
+        # (emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i]))
+        # emp_connected[4]/(emp_connected[4] + emp_not_connected[4])
         try :
             del street_graph
             del node_graph
