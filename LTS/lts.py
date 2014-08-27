@@ -1359,74 +1359,74 @@ class LTS:
 
 
 
-                        # for taz2, ll2  in selected_nodes.iteritems():
-                        #     list_of_nodes2 = ll2[0]
-                        #     num_of_nodes2 = ll2[1]
-                        #     # origin_pop = node_graph.node[node]['TAZ2010_PO'] 
-                        # # if node != dest:
-                        #     for dest in list_of_nodes2:
-                        #         distance1 = distance2 = distance3 = distance4 = 0
-                        #         ###############
-                        #         # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
-                        #         # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
-                        #         # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
-                        #         ###############
-                        #         dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                        for taz2, ll2  in selected_nodes.iteritems():
+                            list_of_nodes2 = ll2[0]
+                            num_of_nodes2 = ll2[1]
+                            # origin_pop = node_graph.node[node]['TAZ2010_PO'] 
+                        # if node != dest:
+                            for dest in list_of_nodes2:
+                                distance1 = distance2 = distance3 = distance4 = 0
+                                ###############
+                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                                # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
+                                ###############
+                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
                                        
-                        #         assert dest_pop >= 0, "negative Population"
+                                assert dest_pop >= 0, "negative Population"
 
-                        #         dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
               
-                        #         if dest_emp < 0: dest_emp =0
-                        #         assert dest_emp >= 0, "negative employment"
-                        #         try :
-                        #             distance4 = length_lts4[dest]
-                        #         except Exception,e :
-                        #             # temp_row[3] = -1
-                        #             distance4 = -1 
-                        #             distance3 = -1
-                        #             distance2 = -1 
-                        #             distance1 = -1 
-                        #             writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2 ,dest_emp/num_of_nodes2))
-                        #             not_connected[4] += origin_pop * dest_pop
-                        #             emp_not_connected[4] += origin_pop * dest_emp
-                        #             continue
+                                if dest_emp < 0: dest_emp =0
+                                assert dest_emp >= 0, "negative employment"
+                                try :
+                                    distance4 = length_lts4[dest]
+                                except Exception,e :
+                                    # temp_row[3] = -1
+                                    distance4 = -1 
+                                    distance3 = -1
+                                    distance2 = -1 
+                                    distance1 = -1 
+                                    writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2 ,dest_emp/num_of_nodes2))
+                                    # not_connected[4] += origin_pop * dest_pop
+                                    # emp_not_connected[4] += origin_pop * dest_emp
+                                    continue
 
                                     
-                        #         if distance4 >= minimum_distance :
-                        #             connected[4] += origin_pop * dest_pop
-                        #             emp_connected[4] += origin_pop * dest_emp
-                        #             # temp_row = []
-                        #             # temp_row[3] = distance4 # LTS 4 distance
+                                if distance4 >= minimum_distance :
+                                    # connected[4] += origin_pop * dest_pop
+                                    # emp_connected[4] += origin_pop * dest_emp
+                                    # # temp_row = []
+                                    # temp_row[3] = distance4 # LTS 4 distance
                                     
-                        #             try: 
-                        #                 distance3 = length_lts3[dest]
-                        #                 # temp_row[2] = distance3
-                        #             except KeyError,e:
-                        #                 distance3 = -1
+                                    try: 
+                                        distance3 = length_lts3[dest]
+                                        # temp_row[2] = distance3
+                                    except KeyError,e:
+                                        distance3 = -1
                                     
-                        #             try: 
-                        #                 distance2 = length_lts2[dest]
-                        #                 # temp_row[1] = distance2
-                        #             except KeyError,e:
-                        #                 distance2 = -1
+                                    try: 
+                                        distance2 = length_lts2[dest]
+                                        # temp_row[1] = distance2
+                                    except KeyError,e:
+                                        distance2 = -1
 
-                        #             try: 
-                        #                 distance1 = length_lts1[dest]
-                        #                 # temp_row[0] = distance1
+                                    try: 
+                                        distance1 = length_lts1[dest]
+                                        # temp_row[0] = distance1
 
-                        #             except KeyError,e:
-                        #                 distance1 = -1
+                                    except KeyError,e:
+                                        distance1 = -1
                                 
 
-                        #             #########################
-                        #             writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2, dest_emp/num_of_nodes2))
-                        #             #########################
-                        #         del distance1
-                        #         del distance2
-                        #         del distance3
-                        #         del distance4
-                        #             # pass 
+                                    #########################
+                                    writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2, dest_emp/num_of_nodes2))
+                                    #########################
+                                del distance1
+                                del distance2
+                                del distance3
+                                del distance4
+                                    # pass 
 
 
     
