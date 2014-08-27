@@ -1095,211 +1095,344 @@ class LTS:
                     origin_pop = node_graph.node[node]['TAZ2010_PO']  # how long is it gonna take to find these nodes?
                     assert origin_pop >= 0, "negative Origin Population"
                     origin_taz = node_graph.node[node]['TAZ_ID']
+
+
                     if runLTS1:
+
+
+                        for k, dist in length_lts1.iteritems():
+                            dest_pop = node_graph.node[k]['TAZ2010_PO']
+                            dest_emp = node_graph.node[k]['TAZ2010_EM']
+                            try:
+                                if length_lts4[k] >= minimum_distance :
+                                    if dist <= detour_coeff * length_lts4[k] :
+
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                                        connected[1] += origin_pop * dest_pop
+                                        emp_connected[1] += origin_pop * dest_emp
+                                    else: 
+                                        connected_w_detour[1] += origin_pop * dest_pop
+                                        emp_connected_w_detour[1] += origin_pop * dest_emp
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                            except Exception,e :
+                                #########################
+                                # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                #########################
+                                not_connected[1] += origin_pop * dest_pop
+                                emp_not_connected[1] += origin_pop * dest_emp
+
                         # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
+                    #     for taz2, ll2  in selected_nodes.iteritems():
+                    #         list_of_nodes2 = ll2[0]
+                    #         num_of_nodes2 = ll2[1]
 
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                    #         for dest in list_of_nodes2:
+                    #             # if node != dest:
+                    #             dest_pop = node_graph.node[dest]['TAZ2010_PO']
                                
-                                assert dest_pop >= 0, "negative Population"
+                    #             assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
-                    #
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance = length_lts1[dest]
+                    #             dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                    # #
+                    #             if dest_emp < 0: dest_emp =0
+                    #             assert dest_emp >= 0, "negative employment"
+                    #             try :
+                    #                 distance = length_lts1[dest]
                                 
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                    #                 if length_lts4[dest] >= minimum_distance :
+                    #                     if distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp ))
-                                            #########################
-                                            connected[1] += origin_pop * dest_pop
-                                            emp_connected[1] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[1] += origin_pop * dest_pop
-                                            emp_connected_w_detour[1] += origin_pop * dest_emp
-                                            #########################
-                                            # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
+                    #                         #########################
+                    #                         # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp ))
+                    #                         #########################
+                    #                         connected[1] += origin_pop * dest_pop
+                    #                         emp_connected[1] += origin_pop * dest_emp
+                    #                     else:
+                    #                         connected_w_detour[1] += origin_pop * dest_pop
+                    #                         emp_connected_w_detour[1] += origin_pop * dest_emp
+                    #                         #########################
+                    #                         # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                    #                         #########################
                             
-                                except Exception,e :
-                                    #########################
-                                    # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[1] += origin_pop * dest_pop
-                                    emp_not_connected[1] += origin_pop * dest_emp
+                    #             except Exception,e :
+                    #                 #########################
+                    #                 # writer1.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                    #                 #########################
+                    #                 not_connected[1] += origin_pop * dest_pop
+                    #                 emp_not_connected[1] += origin_pop * dest_emp
                     
 
                     if runLTS2:
                         # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
+                        for k, dist in length_lts2.iteritems():
+                            dest_pop = node_graph.node[k]['TAZ2010_PO']
+                            dest_emp = node_graph.node[k]['TAZ2010_EM']
+                            try:
+                                if length_lts4[k] >= minimum_distance :
+                                    if dist <= detour_coeff * length_lts4[k] :
 
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                                        connected[2] += origin_pop * dest_pop
+                                        emp_connected[2] += origin_pop * dest_emp
+                                    else: 
+                                        connected_w_detour[2] += origin_pop * dest_pop
+                                        emp_connected_w_detour[2] += origin_pop * dest_emp
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                            except Exception,e :
+                                #########################
+                                # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                #########################
+                                not_connected[2] += origin_pop * dest_pop
+                                emp_not_connected[2] += origin_pop * dest_emp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        # for taz2, ll2  in selected_nodes.iteritems():
+                        #     list_of_nodes2 = ll2[0]
+                        #     num_of_nodes2 = ll2[1]
+
+                        #     for dest in list_of_nodes2:
+                        #         # if node != dest:
+                        #         dest_pop = node_graph.node[dest]['TAZ2010_PO']
                                
-                                assert dest_pop >= 0, "negative Population"
+                        #         assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                        #         dest_emp = node_graph.node[dest]['TAZ2010_EM']
                    
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
+                        #         if dest_emp < 0: dest_emp =0
+                        #         assert dest_emp >= 0, "negative employment"
 
-                                try :
-                                    distance = length_lts2[dest]
+                        #         try :
+                        #             distance = length_lts2[dest]
                                     
-                                    if length_lts4[dest] >= minimum_distance:
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                        #             if length_lts4[dest] >= minimum_distance:
+                        #                 if distance <= detour_coeff * length_lts4[dest] :
 
 
-                                            #########################
-                                            # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[2] += origin_pop * dest_pop
-                                            emp_connected[2] += origin_pop * dest_emp
-                                        else:
-                                            connected_w_detour[2] += origin_pop * dest_pop
-                                            emp_connected_w_detour[2] += origin_pop * dest_emp
-                                            #########################
-                                            # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
+                        #                     #########################
+                        #                     # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest]," ",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #                     #########################
+                        #                     connected[2] += origin_pop * dest_pop
+                        #                     emp_connected[2] += origin_pop * dest_emp
+                        #                 else:
+                        #                     connected_w_detour[2] += origin_pop * dest_pop
+                        #                     emp_connected_w_detour[2] += origin_pop * dest_emp
+                        #                     #########################
+                        #                     # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #                     #########################
 
-                                except Exception,e :
-                                    #########################
-                                    # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[2] += origin_pop * dest_pop
-                                    emp_not_connected[2] += origin_pop * dest_emp
+                        #         except Exception,e :
+                        #             #########################
+                        #             # writer2.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #             #########################
+                        #             not_connected[2] += origin_pop * dest_pop
+                        #             emp_not_connected[2] += origin_pop * dest_emp
                                     # pass
                         
                     if runLTS3:
                         # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
 
-                            for dest in list_of_nodes2:
-                                # if node != dest:
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
+                        for k, dist in length_lts3.iteritems():
+                            dest_pop = node_graph.node[k]['TAZ2010_PO']
+                            dest_emp = node_graph.node[k]['TAZ2010_EM']
+                            try:
+                                if length_lts4[k] >= minimum_distance :
+                                    if dist <= detour_coeff * length_lts4[k] :
+
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                                        connected[3] += origin_pop * dest_pop
+                                        emp_connected[3] += origin_pop * dest_emp
+                                    else: 
+                                        connected_w_detour[3] += origin_pop * dest_pop
+                                        emp_connected_w_detour[3] += origin_pop * dest_emp
+                                        #########################
+                                        # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                        #########################
+                            except Exception,e :
+                                #########################
+                                # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                                #########################
+                                not_connected[3] += origin_pop * dest_pop
+                                emp_not_connected[3] += origin_pop * dest_emp
+
+
+
+
+
+
+
+
+                        # for taz2, ll2  in selected_nodes.iteritems():
+                        #     list_of_nodes2 = ll2[0]
+                        #     num_of_nodes2 = ll2[1]
+
+                        #     for dest in list_of_nodes2:
+                        #         # if node != dest:
+                        #         dest_pop = node_graph.node[dest]['TAZ2010_PO']
                                 
-                                assert dest_pop >= 0, "negative Population"
+                        #         assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                        #         dest_emp = node_graph.node[dest]['TAZ2010_EM']
                  
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance = length_lts3[dest]
+                        #         if dest_emp < 0: dest_emp =0
+                        #         assert dest_emp >= 0, "negative employment"
+                        #         try :
+                        #             distance = length_lts3[dest]
                                     
-                                    if length_lts4[dest] >= minimum_distance :
-                                        if distance <= detour_coeff * length_lts4[dest] :
+                        #             if length_lts4[dest] >= minimum_distance :
+                        #                 if distance <= detour_coeff * length_lts4[dest] :
 
-                                            #########################
-                                            # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                            connected[3] += origin_pop * dest_pop
-                                            emp_connected[3] += origin_pop * dest_emp
-                                        else: 
-                                            connected_w_detour[3] += origin_pop * dest_pop
-                                            emp_connected_w_detour[3] += origin_pop * dest_emp
-                                            #########################
-                                            # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                            #########################
-                                except Exception,e :
-                                    #########################
-                                    # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
-                                    #########################
-                                    not_connected[3] += origin_pop * dest_pop
-                                    emp_not_connected[3] += origin_pop * dest_emp
-                                    # pass 
+                        #                     #########################
+                        #                     # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"" ,origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #                     #########################
+                        #                     connected[3] += origin_pop * dest_pop
+                        #                     emp_connected[3] += origin_pop * dest_emp
+                        #                 else: 
+                        #                     connected_w_detour[3] += origin_pop * dest_pop
+                        #                     emp_connected_w_detour[3] += origin_pop * dest_emp
+                        #                     #########################
+                        #                     # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],distance,length_lts4[dest],"connected with detour",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #                     #########################
+                        #         except Exception,e :
+                        #             #########################
+                        #             # writer3.writerow((node_graph.node[node]["qID"],node_graph.node[dest]["qID"],"","","Not Connected",origin_pop/num_of_nodes/total_pop , dest_pop/num_of_nodes2/total_pop,dest_emp/num_of_nodes2/total_emp))
+                        #             #########################
+                        #             not_connected[3] += origin_pop * dest_pop
+                        #             emp_not_connected[3] += origin_pop * dest_emp
+                        #             # pass 
                         
                     if runLTS4:
                         # try:
-                        for taz2, ll2  in selected_nodes.iteritems():
-                            list_of_nodes2 = ll2[0]
-                            num_of_nodes2 = ll2[1]
-                            # origin_pop = node_graph.node[node]['TAZ2010_PO'] 
-                        # if node != dest:
-                            for dest in list_of_nodes2:
-                                distance1 = distance2 = distance3 = distance4 = 0
-                                ###############
-                                # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
-                                # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
-                                # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
-                                ###############
-                                dest_pop = node_graph.node[dest]['TAZ2010_PO']
+
+                        for k, dist in length_lts4.iteritems():
+                            dest_pop = node_graph.node[k]['TAZ2010_PO']
+                            dest_emp = node_graph.node[k]['TAZ2010_EM']
+                            if dist >= minimum_distance:
+                                connected[4] += dest_pop * origin_pop
+                                emp_connected[4] += origin_pop * dest_emp
+
+                            try:
+                                distance1 = length_lts1[k]
+                            except:
+                                not_connected[1] += origin_pop * dest_pop
+                                emp_not_connected[1] += origin_pop * dest_emp
+
+                            try:
+                                distance1 = length_lts2[k]
+                            except:
+                                not_connected[2] += origin_pop * dest_pop
+                                emp_not_connected[2] += origin_pop * dest_emp
+                            try:
+                                distance1 = length_lts3[k]
+                            except:
+                                not_connected[3] += origin_pop * dest_pop
+                                emp_not_connected[3] += origin_pop * dest_emp
+
+
+
+
+
+
+
+
+
+
+
+                        # for taz2, ll2  in selected_nodes.iteritems():
+                        #     list_of_nodes2 = ll2[0]
+                        #     num_of_nodes2 = ll2[1]
+                        #     # origin_pop = node_graph.node[node]['TAZ2010_PO'] 
+                        # # if node != dest:
+                        #     for dest in list_of_nodes2:
+                        #         distance1 = distance2 = distance3 = distance4 = 0
+                        #         ###############
+                        #         # dest_pop = node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2
+                        #         # dest_emp = node_graph.node[dest]['TAZ2010_EM']/total_emp/num_of_nodes2
+                        #         # sanity_dict[4] += (node_graph.node[dest]['TAZ2010_PO']/total_pop/num_of_nodes2) * origin_pop
+                        #         ###############
+                        #         dest_pop = node_graph.node[dest]['TAZ2010_PO']
                                        
-                                assert dest_pop >= 0, "negative Population"
+                        #         assert dest_pop >= 0, "negative Population"
 
-                                dest_emp = node_graph.node[dest]['TAZ2010_EM']
+                        #         dest_emp = node_graph.node[dest]['TAZ2010_EM']
               
-                                if dest_emp < 0: dest_emp =0
-                                assert dest_emp >= 0, "negative employment"
-                                try :
-                                    distance4 = length_lts4[dest]
-                                except Exception,e :
-                                    # temp_row[3] = -1
-                                    distance4 = -1 
-                                    distance3 = -1
-                                    distance2 = -1 
-                                    distance1 = -1 
-                                    writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2 ,dest_emp/num_of_nodes2))
-                                    not_connected[4] += origin_pop * dest_pop
-                                    emp_not_connected[4] += origin_pop * dest_emp
-                                    continue
+                        #         if dest_emp < 0: dest_emp =0
+                        #         assert dest_emp >= 0, "negative employment"
+                        #         try :
+                        #             distance4 = length_lts4[dest]
+                        #         except Exception,e :
+                        #             # temp_row[3] = -1
+                        #             distance4 = -1 
+                        #             distance3 = -1
+                        #             distance2 = -1 
+                        #             distance1 = -1 
+                        #             writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2 ,dest_emp/num_of_nodes2))
+                        #             not_connected[4] += origin_pop * dest_pop
+                        #             emp_not_connected[4] += origin_pop * dest_emp
+                        #             continue
 
                                     
-                                if distance4 >= minimum_distance :
-                                    connected[4] += origin_pop * dest_pop
-                                    emp_connected[4] += origin_pop * dest_emp
-                                    # temp_row = []
-                                    # temp_row[3] = distance4 # LTS 4 distance
+                        #         if distance4 >= minimum_distance :
+                        #             connected[4] += origin_pop * dest_pop
+                        #             emp_connected[4] += origin_pop * dest_emp
+                        #             # temp_row = []
+                        #             # temp_row[3] = distance4 # LTS 4 distance
                                     
-                                    try: 
-                                        distance3 = length_lts3[dest]
-                                        # temp_row[2] = distance3
-                                    except KeyError,e:
-                                        distance3 = -1
+                        #             try: 
+                        #                 distance3 = length_lts3[dest]
+                        #                 # temp_row[2] = distance3
+                        #             except KeyError,e:
+                        #                 distance3 = -1
                                     
-                                    try: 
-                                        distance2 = length_lts2[dest]
-                                        # temp_row[1] = distance2
-                                    except KeyError,e:
-                                        distance2 = -1
+                        #             try: 
+                        #                 distance2 = length_lts2[dest]
+                        #                 # temp_row[1] = distance2
+                        #             except KeyError,e:
+                        #                 distance2 = -1
 
-                                    try: 
-                                        distance1 = length_lts1[dest]
-                                        # temp_row[0] = distance1
+                        #             try: 
+                        #                 distance1 = length_lts1[dest]
+                        #                 # temp_row[0] = distance1
 
-                                    except KeyError,e:
-                                        distance1 = -1
+                        #             except KeyError,e:
+                        #                 distance1 = -1
                                 
 
-                                    #########################
-                                    writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2, dest_emp/num_of_nodes2))
-                                    #########################
-                                del distance1
-                                del distance2
-                                del distance3
-                                del distance4
-                                    # pass 
+                        #             #########################
+                        #             writer5.writerow((node_graph.node[node]["qID"],origin_taz,node_graph.node[dest]["qID"],taz2,distance1,distance2, distance3, distance4, origin_pop/num_of_nodes , dest_pop/num_of_nodes2, dest_emp/num_of_nodes2))
+                        #             #########################
+                        #         del distance1
+                        #         del distance2
+                        #         del distance3
+                        #         del distance4
+                        #             # pass 
 
 
     
 
         time_5 = time.time()
-        # self.dlg.ui.progress_text.append("Done!")
-        # self.dlg.ui.progress_text.append("home-work[4] is " + str(employment_connectivity[4]))
-        # self.dlg.ui.progress_text.append("home-home[4] is " + str(population_connectivity[4]))
+
 
 
         # SHOULD SAVE OUTPUT TO EXCEL FILE
@@ -1311,9 +1444,7 @@ class LTS:
         field_headings_2 = ['Home to Work Connectivity']
 
         fieldnames = ['LTS level','Connected', 'Requires excessive detour','Not connected at all']
-        # fieldnames2 = ['LTS level','home to home connected_w_detour', 'home to work connected_w_detour']
-        # fieldnames3 = ['LTS level','home to home disconnected', 'home to work disconnected']
-
+  
         self.dlg.ui.ConnProgressBar.setValue(90)
         with open( writefile, 'w' ) as f:
             writer = csv.writer(f)
@@ -1331,19 +1462,10 @@ class LTS:
                 writer.writerow((i,(emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) , (emp_connected_w_detour[i] /(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) , (emp_not_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])),
                         (emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) + (emp_connected_w_detour[i] /(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])) +   (emp_not_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i]))  ))
             writer.writerow((4,emp_connected[4]/(emp_connected[4] + emp_not_connected[4]), 0, (emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4])), (emp_connected[4]/(emp_connected[4] + emp_not_connected[4]))+ (emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]))))
-            writer.writerow((""))      
+                  
 
 
-        #     writer.writerow(fieldnames2)
-        #     for i in range(1,4):
-        #         writer.writerow((i,(connected_w_detour[i] + connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_connected_w_detour[i] + emp_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-        #     writer.writerow(fieldnames3)    
-        #     for i in range(1,4):
-        #         writer.writerow((i,(not_connected[i])/(connected[i] + connected_w_detour[i] + not_connected[i]) , (emp_not_connected[i])/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i])))
-        #     writer.writerow((4,not_connected[4]/(connected[4] + not_connected[4]),emp_not_connected[4]/(emp_connected[4] + emp_not_connected[4]) ))
-
-        # (emp_connected[i]/(emp_connected[i] + emp_connected_w_detour[i] + emp_not_connected[i]))
-        # emp_connected[4]/(emp_connected[4] + emp_not_connected[4])
+      
         try :
             del street_graph
             del node_graph
@@ -1352,7 +1474,7 @@ class LTS:
         except:
             pass 
 
-        QMessageBox.information(self.dlg, ("Done"), ("Finished Successfully")) 
+        QMessageBox.information(self.dlg, ("Done"), ("Finished Successfully\n" + save_path)) 
         self.dlg.ui.ConnProgressBar.setValue(100)
 
         self.dlg.close()
